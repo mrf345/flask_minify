@@ -1,5 +1,5 @@
 <h1 align='center'> flask_minify </h1>
-<h4 align='center'>A Flask extension to minify flask response for html, javascript, css and less compilation as well.</h4>
+<h3 align='center'>A Flask extension to minify flask response for html, javascript, css and less compilation as well.</h3>
 
 ## Install:
 #### - With pip
