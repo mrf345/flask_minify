@@ -1,4 +1,3 @@
-from os import remove, path, name as osName
 from lesscpy import compile
 from jsmin import jsmin
 from six import StringIO
