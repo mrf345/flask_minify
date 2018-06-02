@@ -18,8 +18,8 @@ register(cleanUp)
 def root():
     with open('index.html', 'w+') as file:
         file.write("<html>\n<head>\n")
-        file.write("<script>\nif (true) {\n\tconsole.log('working !')\n}\n</script>")
-        file.write("<style>\nbody\n{\n\tbackground-color: red;\n}\n</style>")
+        file.write('<script>\nif (true) {\n\tconsole.log("working !")\n}\n</script>')
+        file.write('<style>\n body {\n background-color: black; \n} h1 {\n color: white;\n}\n</style>')
         file.write("\n</head>\n<body>\n<h1>Flask-Less Example !</h1>\n</body>\n</html>\n")
     return render_template('index.html')
 

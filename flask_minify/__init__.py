@@ -38,16 +38,12 @@ class minify(object):
             response.direct_passthrough = False
             text = response.get_data(as_text=True)
             for tag in self.tags:
-                tagType = 'javascript' if tag == 'script' else 'css'
-                if '<' + tag + ' type="' + tagType + '">' in text or '<' + tag + '>' in text:
+                if '<' + tag + ' type=' in text or '<' + tag + '>' in text:
                     for i in range(1, len(text.split('<' + tag))):
                         toReplace = text.split('<' + tag, i)[i].split('</' + tag + '>')[0]
-                        if 'type="text/' + tagType + '"' in toReplace:
-                            toReplace = toReplace.replace('type="text/' + tag + '"', '')
-                        if toReplace[:1] == '>':
-                            toReplace = toReplace[1:]
+                        toReplace = toReplace.split('>', 1)[1]
                         if tag == 'style':
-                            text = text.replace(toReplace, compile(StringIO(toReplace), minify=True))
+                            text = text.replace(toReplace, compile(StringIO(toReplace), minify=True, xminify=True))
                         elif tag == 'script':
                             text = text.replace(toReplace, jsmin(toReplace).replace('\n', ';'))
             if self.html:
