@@ -3,10 +3,6 @@ from lesscpy import compile
 from jsmin import jsmin
 from six import StringIO
 from htmlmin import minify as minifyHtml
-# Fixing file not found for py2
-from sys import version_info
-if version_info.major == 2:
-    FileNotFoundError = IOError
 
 
 class minify(object):
