@@ -17,18 +17,11 @@ class minify(object):
         self.html = html
         self.js = js
         self.cssless = cssless
-        self.tags = []
-        if self.js:
-            self.tags.append('script')
-        if self.cssless:
-            self.tags.append('style')
         if self.app is None:
             raise(AttributeError("minify(app=) requires Flask app instance"))
-        for arg in [
-            ['cssless', cssless],
-            ['js', js]]:
-            if not isinstance(arg[1], bool):
-                raise(TypeError("minify(" + arg[0] + "=) requires True or False"))
+        for arg in ['cssless', 'js']:
+            if not isinstance(eval(arg), bool):
+                raise(TypeError("minify(" + arg + "=) requires True or False"))
         app.after_request(self.toLoopTag)
 
 
@@ -36,17 +29,25 @@ class minify(object):
         if response.content_type == u'text/html; charset=utf-8':
             response.direct_passthrough = False
             text = response.get_data(as_text=True)
-            for tag in self.tags:
+            for tag in [t for t in [
+                (0, 'style')[self.cssless], 
+                (0, 'script')[self.js]
+                ] if t != 0]:
                 if '<' + tag + ' type=' in text or '<' + tag + '>' in text:
                     for i in range(1, len(text.split('<' + tag))):
-                        toReplace = text.split('<' + tag, i)[i].split('</' + tag + '>')[0]
-                        toReplace = toReplace.split('>', 1)[1]
-                        if tag == 'style':
-                            text = text.replace(toReplace, compile(StringIO(toReplace), minify=True, xminify=True))
-                        elif tag == 'script':
-                            text = text.replace(toReplace, jsmin(toReplace).replace('\n', ';'))
-            if self.html:
-                response.set_data(minifyHtml(text))
-            else:
-                response.set_data(text)
+                        toReplace = text.split(
+                            '<' + tag, i
+                        )[i].split(
+                            '</' + tag + '>'
+                        )[0].split(
+                            '>', 1
+                        )[1]
+                        text = text.replace(
+                            toReplace,
+                            compile(StringIO(toReplace),
+                            minify=True, xminify=True
+                            ) if tag == 'style' else jsmin(toReplace
+                            ).replace('\n', ';')
+                        ) if len(toReplace) > 2 else text
+            response.set_data(minifyHtml(text) if self.html else text)
         return response
