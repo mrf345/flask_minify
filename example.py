@@ -4,7 +4,7 @@ from atexit import register
 from os import remove
 
 app = Flask(__name__, template_folder='.')
-minify(app=app, js=True)
+minify(app=app, js=True, cache=True)
 
 def cleanUp():
     try:
