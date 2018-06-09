@@ -15,6 +15,7 @@ class minify(object):
         @param: app Flask app instance to be passed (default:None).
         @param: js To minify the css output (default:False).
         @param: cssless To minify spaces in css (default:True).
+        @param: cache To cache minifed response with hash (default: True).
         """
         self.app = app
         self.html = html

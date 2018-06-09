@@ -1,18 +1,23 @@
-from setuptools import setup
-with open('README.py') as readme:
-    ld = readme.read()
+"""
+Flask-Minify
+-------------
 
+A Flask extension to minify flask response for html,
+javascript, css and less compilation as well.
+
+"""
+from setuptools import setup
 
 setup(
     name='Flask-Minify',
-    version='0.4',
+    version='0.5.0',
     url='https://github.com/mrf345/flask_minify/',
-    download_url='https://github.com/mrf345/flask_minify/archive/0.4.tar.gz',
+    download_url='https://github.com/mrf345/flask_minify/archive/0.3.tar.gz',
     license='MIT',
     author='Mohamed Feddad',
     author_email='mrf345@gmail.com',
     description='flask extension to minify html, css, js and less',
-    long_description=ld,
+    long_description=__doc__,
     py_modules=['minify'],
     packages=['flask_minify'],
     zip_safe=False,
