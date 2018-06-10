@@ -3,6 +3,7 @@ from jsmin import jsmin
 from six import StringIO
 from htmlmin import minify as minifyHtml
 from hashlib import md5
+from flask import request
 
 
 class minify(object):
@@ -36,10 +37,17 @@ class minify(object):
             response.direct_passthrough = False
             text = response.get_data(as_text=True)
             forHash = md5(text.encode('utf8')).hexdigest()[:9]
-            if self.cache and forHash in self.history.keys():
-                print(self.history)
-                response.set_data(self.history[forHash])
+            if self.cache and request.path + '|' + forHash in self.history.keys():
+                response.set_data(self.history[request.path + '|' + forHash])
                 return response
+            else:
+                for key in self.history.keys():
+                    if key.split('|')[0] == request.path:
+                        self.history = {
+                            i:self.history[i
+                            ] for i in self.history if i != key.split(
+                                '|')[0]
+                        }
             for tag in [t for t in [
                 (0, 'style')[self.cssless], 
                 (0, 'script')[self.js]
@@ -63,5 +71,5 @@ class minify(object):
             finalResp = minifyHtml(text) if self.html else text
             response.set_data(finalResp)
             if self.cache:
-                self.history[forHash] = finalResp
+                self.history[request.path + '|' + forHash] = finalResp
         return response

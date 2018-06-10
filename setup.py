@@ -10,9 +10,9 @@ from setuptools import setup
 
 setup(
     name='Flask-Minify',
-    version='0.5.0',
+    version='0.6,
     url='https://github.com/mrf345/flask_minify/',
-    download_url='https://github.com/mrf345/flask_minify/archive/0.3.tar.gz',
+    download_url='https://github.com/mrf345/flask_minify/archive/0.4.tar.gz',
     license='MIT',
     author='Mohamed Feddad',
     author_email='mrf345@gmail.com',
