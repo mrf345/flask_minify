@@ -1,0 +1,8 @@
+flask
+pytest
+pytest-cov
+lesscpy
+htmlmin
+jsmin
+coverage
+python-coveralls
