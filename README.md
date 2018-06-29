@@ -1,4 +1,7 @@
 <h1 align='center'> flask_minify </h1>
+<p align='center'>
+<a href='https://travis-ci.com/mrf345/flask_minify'><img src='https://travis-ci.com/mrf345/flask_minify.svg?branch=master'></a>
+</p>
 <h3 align='center'>A Flask extension to minify flask response for html, javascript, css and less compilation as well.</h3>
 
 ## Install:
