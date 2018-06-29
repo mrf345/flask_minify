@@ -8,6 +8,6 @@ python:
 install:
   - pip install -r requirements.txt
 # command to run tests
-script: py.test --cov=./flask_minify/ test_main.py
+script: py.test --cov=./flask_minify/ test_fm.py
 after_success:
   - coveralls
