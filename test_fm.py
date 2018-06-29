@@ -66,7 +66,7 @@ def test_minify_cache(client):
     minify_store = minify(app=app, js=False, cssless=False, cache=True)
     client.get('/html').data # to cover hashing return
     resp = client.get('/html').data
-    assert resp in minify_store.history.values()
+    assert resp.decode('utf8') in minify_store.history.values()
 
 def test_false_input(client):
     """ testing false input for raise coverage """
