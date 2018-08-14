@@ -1,2 +1,0 @@
-flask_minify
-minify
