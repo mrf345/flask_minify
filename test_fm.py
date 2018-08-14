@@ -36,6 +36,14 @@ def cssless():
         }
     </style>'''
 
+@app.route('/cssless_false')
+def cssless_false():
+    return '''<style>
+        body {
+            color: red;;
+        }
+    </style>'''
+
 @fixture
 def client():
     app.config['TESTING'] = True
@@ -78,3 +86,23 @@ def test_false_input(client):
         minify(app, 'nothing', 'nothing')
     except Exception as e:
         assert type(e) is TypeError
+
+def test_fail_safe(client):
+    """ testing fail safe enabled with false input """
+    minify(app=app, fail_safe=True)
+    resp = client.get('/cssless_false')
+    assert b'''<style>
+        body {
+            color: red;;
+        }
+    </style>''' == resp.data
+
+def test_fail_safe_false_input(client):
+    """testing fail safe disabled with false input """
+    minify(app=app, fail_safe=False, cache=False)
+    try:
+        client.get('/cssless_false')
+    except Exception as e:
+        assert 'CompilationError' == e.__class__.__name__
+
+    

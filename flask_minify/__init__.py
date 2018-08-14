@@ -8,7 +8,8 @@ from hashlib import md5
 class minify(object):
     def __init__(self, app=None,
         html=True, js=False,
-        cssless=True, cache=True):
+        cssless=True, cache=True,
+        fail_safe=True):
         """
         A Flask extension to minify flask response for html,
         javascript, css and less.
@@ -22,6 +23,7 @@ class minify(object):
         self.js = js
         self.cssless = cssless
         self.cache = cache
+        self.fail_safe = fail_safe
         self.history = {} # where cache hash and compiled response stored 
         if self.app is None:
             raise(AttributeError("minify(app=) requires Flask app instance"))
@@ -52,13 +54,21 @@ class minify(object):
                         )[0].split(
                             '>', 1
                         )[1]
-                        text = text.replace(
-                            toReplace,
-                            compile(StringIO(toReplace),
-                            minify=True, xminify=True
-                            ) if tag == 'style' else jsmin(toReplace
-                            ).replace('\n', ';')
-                        ) if len(toReplace) > 2 else text
+                        result = None
+                        try:
+                            result = text.replace(
+                                toReplace,
+                                compile(StringIO(toReplace),
+                                minify=True, xminify=True
+                                ) if tag == 'style' else jsmin(toReplace
+                                ).replace('\n', ';')
+                            ) if len(toReplace) > 2 else text
+                            text = result
+                        except Exception as e:
+                            if self.fail_safe:
+                                text = result or text
+                            else:
+                                raise e
             finalResp = minifyHtml(text) if self.html else text
             response.set_data(finalResp)
             if self.cache:

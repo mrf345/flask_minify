@@ -1,0 +1,26 @@
+Metadata-Version: 1.1
+Name: Flask-Minify
+Version: 0.8
+Summary: flask extension to minify html, css, js and less
+Home-page: https://github.com/mrf345/flask_minify/
+Author: Mohamed Feddad
+Author-email: mrf345@gmail.com
+License: MIT
+Download-URL: https://github.com/mrf345/flask_minify/archive/0.7.tar.gz
+Description: 
+        Flask-Minify
+        -------------
+        
+        A Flask extension to minify flask response for html,
+        javascript, css and less compilation as well.
+        
+        
+Keywords: flask,extension,minifer,htmlmin,lesscpy,jsmin,html,js,less,css
+Platform: any
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
