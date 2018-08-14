@@ -17,6 +17,7 @@ class minify(object):
         @param: js To minify the css output (default:False).
         @param: cssless To minify spaces in css (default:True).
         @param: cache To cache minifed response with hash (default: True).
+        @param: fail_safe to avoid raising error while minifying (default True).
         """
         self.app = app
         self.html = html

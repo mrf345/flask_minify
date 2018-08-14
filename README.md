@@ -58,7 +58,8 @@ def __init__(self,
   html=True,
   js=False,
   cssless=True,
-  cache=True):
+  cache=True,
+  fail_safe=True):
   """
     A Flask extension to minify flask response for html,
     javascript, css and less.
@@ -66,6 +67,7 @@ def __init__(self,
     @param: js To minify the css output (default:False).
     @param: cssless To minify spaces in css (default:True).
     @param: cache To cache minifed response with hash (default: True).
+    @param: fail_safe to avoid raising error while minifying (default True).
   """
 ```
 
