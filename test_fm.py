@@ -19,6 +19,17 @@ def html():
         </html>'''
 
 
+@app.route('/bypassed')
+def bypassed():
+    return '''<html>
+            <body>
+                <h1>
+                    HTML
+                </h1>
+            </body>
+        </html>'''
+
+
 @app.route('/js')
 def js():
     return '''<script>
@@ -55,9 +66,16 @@ def client():
     yield client
 
 
+def test_html_bypassing(client):
+    """ testing HTML route bypassing """
+    minify(app=app, html=True, cssless=False, js=False, bypass=['/html'])
+    resp = client.get('/html')
+    assert b'<html> <body> <h1> HTML </h1> </body> </html>' != resp.data
+
+
 def test_html_minify(client):
     """ testing HTML minify option """
-    minify(app=app, html=True, cssless=False, js=False, bypass=['/html'])
+    minify(app=app, html=True, cssless=False, js=False)
     resp = client.get('/html')
     assert b'<html> <body> <h1> HTML </h1> </body> </html>' == resp.data
 
@@ -116,10 +134,3 @@ def test_fail_safe_false_input(client):
         client.get('/cssless_false')
     except Exception as e:
         assert 'CompilationError' == e.__class__.__name__
-
-
-def test_bypassing_route(client):
-    """ testing bypass route option """
-    minify(app=app, bypass=['/html'])
-    resp = client.get('/html')
-    assert b'<html> <body> <h1> HTML </h1> </body> </html>' != resp.data
