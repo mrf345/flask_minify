@@ -59,7 +59,8 @@ def __init__(self,
   js=False,
   cssless=True,
   cache=True,
-  fail_safe=True):
+  fail_safe=True,
+  bypass=[]):
   """
     A Flask extension to minify flask response for html,
     javascript, css and less.
@@ -68,6 +69,9 @@ def __init__(self,
     @param: cssless To minify spaces in css (default:True).
     @param: cache To cache minifed response with hash (default: True).
     @param: fail_safe to avoid raising error while minifying (default True).
+    @param: bypass a list of the routes to be bypassed by the minifier
+    Notice: bypass route should be identical to the url_rule used for example:
+    bypass=['/user/<int:user_id>', '/users']
   """
 ```
 
