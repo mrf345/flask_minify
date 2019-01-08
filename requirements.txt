@@ -1,5 +1,5 @@
 flask
-pytest
+pytest==3.6
 pytest-cov
 lesscpy
 htmlmin
