@@ -70,7 +70,8 @@ class minify(object):
                 (0, 'style')[self.cssless],
                 (0, 'script')[self.js]
             ] if t != 0]:
-                if '<' + tag + ' type=' in text or '<' + tag + '>' in text:
+                if '<' + tag + ' type=' in text or '<' + tag + '>' in text 
+                    or '<' + tag + ' amp-custom' in text + '>':
                     for i in range(1, len(text.split('<' + tag))):
                         toReplace = text.split(
                             '<' + tag, i
