@@ -1,11 +1,9 @@
-from os import close, unlink
-from tempfile import mkstemp
 from pytest import fixture
-from hashlib import md5
 from flask import Flask
 from flask_minify import minify
 
 app = Flask(__name__)
+store_minify = minify(app=app)
 
 
 @app.route('/html')
@@ -35,7 +33,7 @@ def js():
     return '''<script>
         ["J", "S"].reduce(
             function (a, r) {
-                return a + r 
+                return a + r
             })
     </script>'''
 
@@ -48,6 +46,16 @@ def cssless():
             color: @a;
         }
     </style>'''
+
+
+@app.route('/js/<addition>')
+def js_addition(addition=None):
+    return '''<script>
+        ["J", "S"].reduce(
+            function (a, r) {
+                return a + r
+            })
+    ''' + (addition + '\n</script>')
 
 
 @app.route('/cssless_false')
@@ -66,42 +74,41 @@ def client():
     yield client
 
 
-def test_html_bypassing(client):
-    """ testing HTML route bypassing """
-    minify(app=app, html=True, cssless=False, js=False, bypass=['/html'])
-    resp = client.get('/html')
-    assert b'<html> <body> <h1> HTML </h1> </body> </html>' != resp.data
-
-
 def test_html_minify(client):
     """ testing HTML minify option """
-    minify(app=app, html=True, cssless=False, js=False)
     resp = client.get('/html')
     assert b'<html> <body> <h1> HTML </h1> </body> </html>' == resp.data
 
 
+def test_html_bypassing(client):
+    """ testing HTML route bypassing """
+    store_minify.bypass.append('/html')
+    resp = client.get('/html')
+    assert b'<html> <body> <h1> HTML </h1> </body> </html>' != resp.data
+
+
 def test_javascript_minify(client):
     """ testing JavaScript minify option """
-    minify(app=app, html=False, cssless=False, js=True)
     resp = client.get('/js')
     assert b'<script>["J","S"].reduce(function(a,r){return a+r})</script>' == resp.data
 
 
 def test_lesscss_minify(client):
     """ testing css and less minify option """
-    minify(app=app, html=False, cssless=True, js=False)
+    store_minify.cssless = True
     resp = client.get('/cssless')
     assert b'<style>body{color:red;}</style>' == resp.data
 
 
 def test_minify_cache(client):
     """ testing caching minifed response """
-    minify_store = minify(app=app, js=False, cssless=True, cache=True)
-    client.get('/cssless').data # to cover hashing return
+    store_minify.caching_limit = 10
+    client.get('/cssless')  # hit it twice, to get the cached minified response
     resp = client.get('/cssless').data
-    assert resp.decode('utf8').replace(
-        '<style>', ''
-    ).replace('</style>', '') in minify_store.history.values()
+
+    assert resp.decode('utf8').replace('<style>', '')\
+                              .replace('</style>', '') in\
+        store_minify.cache.get('/cssless', {}).values()
 
 
 def test_false_input(client):
@@ -118,7 +125,7 @@ def test_false_input(client):
 
 def test_fail_safe(client):
     """ testing fail safe enabled with false input """
-    minify(app=app, fail_safe=True)
+    store_minify.cssless = False
     resp = client.get('/cssless_false')
     assert b'''<style>
         body {
@@ -129,8 +136,39 @@ def test_fail_safe(client):
 
 def test_fail_safe_false_input(client):
     """testing fail safe disabled with false input """
-    minify(app=app, fail_safe=False, cache=False)
+    store_minify.fail_safe = False
     try:
         client.get('/cssless_false')
     except Exception as e:
+        raise e
         assert 'CompilationError' == e.__class__.__name__
+
+
+def test_caching_limit_only_when_needed(client):
+    """test caching limit without any variations """
+    store_minify.caching_limit = 5
+    store_minify.cssless = True
+    resp = [client.get('/cssless').data for i in range(10)]
+
+    assert len(store_minify.cache.get('/cssless', {})) == 1
+    for r in resp:
+        assert b'<style>body{color:red;}</style>' == r
+
+
+def test_caching_limit_exceeding(client):
+    """test caching limit with multiple variations """
+    resp = [client.get('/js/{}'.format(i)).data for i in range(10)]
+
+    assert len(store_minify.cache.get('/js/<addition>', {}))\
+        == store_minify.caching_limit
+    for i, r in enumerate(resp[:store_minify.caching_limit]):
+        assert bytes((
+            '<script>["J","S"].reduce(function(a,r){return a+r});' +
+            str(i) + '</script>').encode('utf-8')) == r
+        assert r in [
+            bytes(('<script>' + c + '</script>').encode('utf-8')) for c in
+            store_minify.cache.get('/js/<addition>', {}).values()]
+
+
+if __name__ == '__main__':
+    app.run()
