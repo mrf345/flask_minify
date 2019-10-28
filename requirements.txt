@@ -1,8 +1,9 @@
 flask
-pytest==3.6
+pytest
 pytest-cov
 lesscpy
 htmlmin
 jsmin
 coverage
 python-coveralls
+xxhash
