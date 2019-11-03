@@ -1,6 +1,4 @@
 flask
-pytest
-pytest-cov
 lesscpy
 htmlmin
 jsmin
