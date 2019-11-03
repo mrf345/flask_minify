@@ -110,6 +110,7 @@ class minify(object):
         ''' get the patterns that matches the current endpoint.
 
         Parameters:
+        -----------
             patterns [list]: regex patterns or strings to match endpoint.
         '''
         matches = [compiled_pattern for compiled_pattern in

@@ -10,9 +10,9 @@ from setuptools import setup
 
 setup(
     name='Flask-Minify',
-    version='0.11',
+    version='0.110',
     url='https://github.com/mrf345/flask_minify/',
-    download_url='https://github.com/mrf345/flask_minify/archive/0.10.tar.gz',
+    download_url='https://github.com/mrf345/flask_minify/archive/0.110.tar.gz',
     license='MIT',
     author='Mohamed Feddad',
     author_email='mrf345@gmail.com',
@@ -27,11 +27,18 @@ setup(
         'Flask',
         'htmlmin',
         'jsmin',
-        'lesscpy'
+        'lesscpy',
+        'xxhash'
     ],
     keywords=['flask', 'extension', 'minifer', 'htmlmin', 'lesscpy',
               'jsmin', 'html', 'js', 'less', 'css'],
     classifiers=[
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
