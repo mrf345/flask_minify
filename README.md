@@ -53,26 +53,45 @@ minify(app=app)
 
 ## Options:
 ```python
-def __init__(self,
-  app=None,
-  html=True,
-  js=False,
-  cssless=True,
-  cache=True,
-  fail_safe=True,
-  bypass=[]):
-  """
-    A Flask extension to minify flask response for html,
-    javascript, css and less.
-    @param: app Flask app instance to be passed (default:None).
-    @param: js To minify the css output (default:False).
-    @param: cssless To minify spaces in css (default:True).
-    @param: cache To cache minifed response with hash (default: True).
-    @param: fail_safe to avoid raising error while minifying (default True).
-    @param: bypass a list of the routes to be bypassed by the minifier
-    Notice: bypass route should be identical to the url_rule used for example:
-    bypass=['/user/<int:user_id>', '/users']
-  """
+def __init__(
+        self, app=None, html=True, js=True, cssless=True,
+        fail_safe=True, bypass=[], bypass_caching=[], caching_limit=1
+    ):
+        ''' Flask extension to minify flask response for html, javascript,
+            css and less.
+
+        Parameters:
+        ----------
+            app: Flask app instance to be passed.
+            js: To minify the css output.
+            cssless: To minify spaces in css.
+            cache: To cache minifed response with hash.
+            fail_safe: to avoid raising error while minifying.
+            bypass: list of endpoints to bypass minifying for. (Regex)
+            bypass_caching: list of endpoints to bypass caching for. (Regex)
+            caching_limit: to limit the number of minifed response variations.
+
+            NOTE: if `caching_limit` is set to 0, we'll not cache any endpoint
+                  response, so if you want to disable caching just do that.
+
+            EXAMPLE: endpoint is the name of the function decorated with the
+                    `@app.route()` so in the following example the endpoint
+                    will be `root`:
+
+                     @app.('/root/<id>')
+                     def root(id):
+                         return id
+
+            NOTE: when using a `Blueprint` the decorated endpoint will be
+                  suffixed with the blueprint name;
+                  `Blueprint('blueprint_name')` so here the endpoint will be
+                  `blueprint_name.root`.
+
+                  `bypass` and `bypass_caching` can handle regex patterns so if
+                  you want to bypass all routes on a certain blueprint you can
+                  just pass the pattern as such:
+                  minify(app, bypass=['blueprint_name.*'])
+        '''
 ```
 
 ## Credit:

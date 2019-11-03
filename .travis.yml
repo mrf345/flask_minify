@@ -7,8 +7,8 @@ python:
   - "3.7"
 # command to install dependencies
 install:
-  - pip install -r requirements.txt
+  - pip install -r requirements/test.txt
 # command to run tests
-script: py.test --cov=./flask_minify/ test_fm.py
+script: py.test --cov=./flask_minify/ tests/integration.py
 after_success:
   - coveralls
