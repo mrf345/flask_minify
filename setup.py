@@ -10,9 +10,9 @@ from setuptools import setup
 
 setup(
     name='Flask-Minify',
-    version='0.110',
+    version='0.12',
     url='https://github.com/mrf345/flask_minify/',
-    download_url='https://github.com/mrf345/flask_minify/archive/0.110.tar.gz',
+    download_url='https://github.com/mrf345/flask_minify/archive/0.12.tar.gz',
     license='MIT',
     author='Mohamed Feddad',
     author_email='mrf345@gmail.com',
@@ -47,6 +47,5 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
-    setup_requires=['pytest-runner'],
-    test_requires=['pytest']
+    setup_requires=['pytest-runner']
 )
