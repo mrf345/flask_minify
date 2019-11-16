@@ -1,13 +1,18 @@
-import sys
+from sys import path as sys_path
 from os import path
+from sys import path as sys_path
+from importlib import import_module
 from pytest import fixture
 from flask import Flask
+
 from constants import (
     HTML, JS, LESS, MINIFED_HTML, MINIFIED_JS,
     MINIFED_LESS, FALSE_LESS, MINIFED_STRIPED)
 
-sys.path.append(path.dirname(path.dirname(__file__)))
-from flask_minify import minify
+
+sys_path.append(path.dirname(path.dirname(__file__)))
+minify = import_module('flask_minify').minify
+
 
 app = Flask(__name__)
 store_minify = minify(app=app, fail_safe=False)
