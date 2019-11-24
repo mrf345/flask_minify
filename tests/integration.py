@@ -1,6 +1,5 @@
 from sys import path as sys_path
 from os import path
-from sys import path as sys_path
 from importlib import import_module
 from pytest import fixture
 from flask import Flask
