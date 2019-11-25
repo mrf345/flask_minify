@@ -72,7 +72,7 @@ class minify(object):
     def endpoint(self):
         ''' to get the current response endpoint, with a failsafe.'''
         with self.app.app_context():
-            return getattr(request, 'endpoint', '')
+            return getattr(request, 'endpoint', '') or ''
 
     @property
     def iter_tags_to_minify(self):
