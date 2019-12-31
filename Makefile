@@ -5,7 +5,6 @@ test: install
 run: install
 	python tests/integration.py
 release: install clean
-	~/Projects/increment
 	python setup.py sdist bdist_wheel
 	python -m twine upload dist/*
 	$(MAKE) clean
