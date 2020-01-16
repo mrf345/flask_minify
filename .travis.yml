@@ -10,6 +10,6 @@ python:
 install:
   - pip install -r requirements/test.txt
 # command to run tests
-script: py.test --cov=./flask_minify tests/*
+script: flake8 ./flask_minify/* && py.test --cov=./flask_minify tests/*
 after_success:
   - coveralls

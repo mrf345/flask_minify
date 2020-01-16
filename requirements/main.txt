@@ -3,3 +3,4 @@ lesscpy
 htmlmin
 jsmin
 xxhash
+pyyaml==5.2

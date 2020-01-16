@@ -1,29 +1,25 @@
-"""
-Flask-Minify
--------------
-
-A Flask extension to minify flask response for html,
-javascript, css and less compilation as well.
-
-"""
 from setuptools import setup
 from os import path
 
-# read the contents of your README file
-this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+from flask_minify import __version__ as VERSION
+from flask_minify import __doc__ as DOC
+
+
+with open(path.join(path.abspath(path.dirname(__file__)), 'README.md'),
+          encoding='utf-8') as f:
     long_description = f.read()
 
 
 setup(
     name='Flask-Minify',
-    version='0.16',
+    version=VERSION,
     url='https://github.com/mrf345/flask_minify/',
-    download_url='https://github.com/mrf345/flask_minify/archive/0.13.tar.gz',
+    download_url='https://github.com/mrf345/flask_minify/archive/%s.tar.gz'
+    % VERSION,
     license='MIT',
     author='Mohamed Feddad',
     author_email='mrf345@gmail.com',
-    description='flask extension to minify html, css, js and less',
+    description=DOC,
     long_description=long_description,
     long_description_content_type='text/markdown',
     py_modules=['minify'],

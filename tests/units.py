@@ -2,6 +2,8 @@ from sys import path as sys_path
 from os import path
 from importlib import import_module
 
+from flask_minify.utils import (is_empty)
+
 
 sys_path.append(path.dirname(path.dirname(__file__)))
 minify = import_module('flask_minify').minify
@@ -9,6 +11,14 @@ unittest = import_module('unittest')
 
 # workaround for py2 vs py3 mock import
 mock = getattr(unittest, 'mock', None) or import_module('mock')
+
+
+class TestUtils:
+    def test_is_empty(self):
+        ''' Test is_empty check is correct '''
+
+        assert is_empty('Not empty at all') is False
+        assert is_empty('\n\t  \t\n\n' * 10) is True
 
 
 class TestMinifyRequest:
