@@ -4,3 +4,4 @@ pytest-cov
 coverage
 python-coveralls
 mock
+flake8
