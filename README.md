@@ -25,48 +25,37 @@
 > - `python setup.py install`
 
 ## Setup:
-#### - Inside Flask app:
-
+> With this setup the extension will minify every HTML request, unless it's explicitly bypassed.
 ```python
 from flask import Flask
 from flask_minify import minify
 
 app = Flask(__name__)
-minify(app=app)
+minify(app=app, html=True, js=True, cssless=True)
 ```
 
-#### - Result:
+#### - Using a decorator instead:
+> You can set the extension to be passive so it will minify only the decorated routes.
 
-> Before:
-```html
-<html>
-  <head>
-    <script>
-      if (true) {
-      	console.log('working !')
-      }
-    </script>
-    <style>
-      body {
-      	background-color: red;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Flask-Less Example !</h1>
-  </body>
-</html>
-```
-> After:
-```html
-<html> <head><script>if(true){console.log('working !')}</script><style>body{background-color:red;}</style></head> <body> <h1>Flask-Less Example !</h1> </body> </html>
+```python
+from flask import Flask
+from flask_minify import minify, decorators
+
+app = Flask(__name__)
+minify(app=app, passive=True)
+
+@app.route('/')
+@decorators.minify(html=True, js=True, cssless=True)
+def example():
+  return '<h1>Example...</h1>'
 ```
 
 ## Options:
 ```python
 def __init__(
         self, app=None, html=True, js=True, cssless=True,
-        fail_safe=True, bypass=[], bypass_caching=[], caching_limit=1
+        fail_safe=True, bypass=[], bypass_caching=[], caching_limit=1,
+        passive=False
     ):
         ''' Extension to minify flask response for html, javascript, css and less.
 
@@ -86,6 +75,8 @@ def __init__(
                 list of endpoints to bypass caching for. (Regex)
             caching_limit: int
                 to limit the number of minified response variations.
+            passive: bool
+                to disable active minifying.
 
             NOTE: if `caching_limit` is set to 0, we'll not cache any endpoint
                   response, so if you want to disable caching just do that.
