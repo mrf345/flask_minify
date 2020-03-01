@@ -1,13 +1,13 @@
 from sys import maxsize
 from six import StringIO
-from re import compile as compile_re, DOTALL
+from re import compile as compile_re
 from flask import request, _app_ctx_stack
 from xxhash import xxh64, xxh32
 from htmlmin import minify as minify_html
 from lesscpy import compile as compile_less
 from jsmin import jsmin
 
-from flask_minify.utils import is_empty
+from flask_minify.utils import get_tag_contents, is_html
 
 # optimized hashing speed based on cpu architecture
 hashing = xxh64 if maxsize > 2**32 else xxh32
@@ -16,7 +16,8 @@ hashing = xxh64 if maxsize > 2**32 else xxh32
 class minify(object):
     def __init__(
         self, app=None, html=True, js=True, cssless=True,
-        fail_safe=True, bypass=[], bypass_caching=[], caching_limit=1
+        fail_safe=True, bypass=[], bypass_caching=[], caching_limit=1,
+        passive=False
     ):
         ''' Extension to minify flask response for html, javascript, css and less.
 
@@ -36,6 +37,8 @@ class minify(object):
                 list of endpoints to bypass caching for. (Regex)
             caching_limit: int
                 to limit the number of minifed response variations.
+            passive: bool
+                to disable active minifying.
 
             NOTE: if `caching_limit` is set to 0, we'll not cache any endpoint
                   response, so if you want to disable caching just do that.
@@ -67,6 +70,7 @@ class minify(object):
         self.caching_limit = caching_limit
         self.cache = {}
         self._app = app
+        self.passive = passive
 
         app and self.init_app(app)
 
@@ -91,13 +95,6 @@ class minify(object):
         with self.app.app_context():
             return getattr(request, 'endpoint', '') or ''
 
-    @property
-    def iter_tags_to_minify(self):
-        ''' Safely iterate html tags to minify, if tag's enabled '''
-        tags = {'style': self.cssless, 'script': self.js}
-
-        return getattr(tags, 'iteritems', tags.items)()
-
     def init_app(self, app):
         ''' Handle initiation of multiple apps NOTE:Factory Method'''
         app.after_request(self.main)
@@ -107,7 +104,27 @@ class minify(object):
         ''' Nothing todo on app context teardown XXX:Factory Method'''
         pass
 
-    def get_minified(self, content, style):
+    @classmethod
+    def iter_tags_to_minify(cls, cssless, js):
+        ''' Safely iterate html tags to minify, if tag's enabled.
+
+        Parameters
+        ----------
+            cssless: bool
+                to enable css and less.
+            js: bool
+                to enable javascript.
+
+        Returns
+        -------
+            Iterable of html's tag and its status.
+        '''
+        tags = {'style': cssless, 'script': js}
+
+        return getattr(tags, 'iteritems', tags.items)()
+
+    @classmethod
+    def get_minified(cls, content, tag, fail_safe=False):
         ''' To minify css/less or javascript and failsafe that.
 
         Parameters
@@ -116,17 +133,27 @@ class minify(object):
                 a script or style html tag content.
             style: bool
                 if the content belongs to a style html tag.
+            failsafe: bool
+                to avoid raising error while minifying.
 
         Returns
         -------
             String of minified passed content.
         '''
         try:
-            return compile_less(StringIO(content), minify=True, xminify=True)\
-                   if style else jsmin(content).replace('\n', ';')
+            if tag == 'style':
+                return compile_less(StringIO(content),
+                                    minify=True,
+                                    xminify=True)
+            elif tag == 'script':
+                return jsmin(content).replace('\n', ';')
+            else:
+                return minify_html(content)
+
         except Exception as exception:
-            if self.fail_safe:
+            if fail_safe:
                 return content
+
             raise exception
 
     def get_endpoint_matches(self, patterns):
@@ -147,15 +174,15 @@ class minify(object):
 
         return matches
 
-    def store_or_restore_cache(self, content, style):
+    def store_or_restore_cache(self, content, tag):
         ''' Check if the content is already cached and restore or store it.
 
         Parameters
         ----------
             content: str
                 a script or style html tag content.
-            style: bool
-                if the content belongs to a style html tag.
+            tag: bool
+                html tag the content belongs to.
 
         Returns
         -------
@@ -172,9 +199,11 @@ class minify(object):
         if not cache() and should_cache:
             self.cache\
                 .setdefault(self.endpoint, {})\
-                .update({key: self.get_minified(content, style)})
+                .update({key: self.get_minified(content,
+                                                tag,
+                                                self.fail_safe)})
 
-        return cache() or self.get_minified(content, style)
+        return cache() or self.get_minified(content, tag, self.fail_safe)
 
     def main(self, response):
         ''' Where a dragon once lived!
@@ -188,25 +217,20 @@ class minify(object):
         -------
             Minified flask response if it fits the requirements.
         '''
-        valid_html = response.content_type == u'text/html; charset=utf-8'
-        should_bypass = self.get_endpoint_matches(self.bypass)
+        should_bypass = self.get_endpoint_matches(self.bypass) or self.passive
 
-        if valid_html and not should_bypass:
+        if is_html(response) and not should_bypass:
             response.direct_passthrough = False
             text = response.get_data(as_text=True)
 
-            for tag, enabled in self.iter_tags_to_minify:
+            for tag, enabled in self.iter_tags_to_minify(self.cssless,
+                                                         self.js):
                 if enabled:
-                    tag_contents = compile_re(
-                        r'<{0}[^>]*>(.+?)</{0}>'
-                        .format(tag), DOTALL).findall(text)
+                    for content in get_tag_contents(text, tag):
+                        text = text.replace(content,
+                                            self.store_or_restore_cache
+                                            (content, tag))
 
-                    for content in tag_contents:
-                        if not is_empty(content):
-                            text = text.replace(
-                                content,
-                                self.store_or_restore_cache
-                                (content, tag == 'style'))
-
-            response.set_data(minify_html(text) if self.html else text)
+            response.set_data(self.get_minified(text, 'html', self.fail_safe)
+                              if self.html else text)
         return response

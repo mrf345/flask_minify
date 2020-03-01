@@ -1,55 +1,8 @@
-from sys import path as sys_path
-from os import path
-from importlib import import_module
 from pytest import fixture
-from flask import Flask
 
-from constants import (
-    HTML, JS, LESS, MINIFED_HTML, MINIFIED_JS,
-    MINIFED_LESS, FALSE_LESS, MINIFED_STRIPED)
-
-
-sys_path.append(path.dirname(path.dirname(__file__)))
-minify = import_module('flask_minify').minify
-
-
-app = Flask(__name__)
-store_minify = minify(app=app, fail_safe=False)
-
-
-@app.route('/html')
-def html():
-    return HTML
-
-
-@app.route('/bypassed')
-def bypassed():
-    return HTML
-
-
-@app.route('/js')
-def js():
-    return JS
-
-
-@app.route('/cssless')
-def cssless():
-    return LESS
-
-
-@app.route('/js/<addition>')
-def js_addition(addition=None):
-    return '''<script>
-        ["J", "S"].reduce(
-            function (a, r) {
-                return a + r
-            })
-    ''' + (addition + '\n</script>')
-
-
-@app.route('/cssless_false')
-def cssless_false():
-    return FALSE_LESS
+from .setup import store_minify, app
+from .constants import (HTML, LESS, FALSE_LESS, MINIFED_HTML, MINIFIED_JS,
+                        MINIFED_LESS, MINIFED_STRIPED)
 
 
 @fixture
@@ -60,39 +13,40 @@ def client():
     store_minify.caching_limit = 1
     store_minify.bypass_caching = []
     store_minify.cache = {}
+    store_minify.passive = False
     app.config['TESTING'] = True
     client = app.test_client()
     yield client
 
 
 def test_html_minify(client):
-    """ testing HTML minify option """
+    ''' testing HTML minify option '''
     resp = client.get('/html')
     assert MINIFED_HTML == resp.data
 
 
 def test_html_bypassing(client):
-    """ testing HTML route bypassing """
+    ''' testing HTML route bypassing '''
     store_minify.bypass.append('html')
     resp = client.get('/html')
     assert bytes(HTML.encode('utf-8')) == resp.data
 
 
 def test_javascript_minify(client):
-    """ testing JavaScript minify option """
+    ''' testing JavaScript minify option '''
     resp = client.get('/js')
     assert MINIFIED_JS == resp.data
 
 
 def test_lesscss_minify(client):
-    """ testing css and less minify option """
+    ''' testing css and less minify option '''
     store_minify.cssless = True
     resp = client.get('/cssless')
     assert MINIFED_LESS == resp.data
 
 
 def test_minify_cache(client):
-    """ testing caching minifed response """
+    ''' testing caching minifed response '''
     store_minify.caching_limit = 10
     client.get('/cssless')  # hit it twice, to get the cached minified response
     resp = client.get('/cssless').data
@@ -103,7 +57,7 @@ def test_minify_cache(client):
 
 
 def test_fail_safe(client):
-    """ testing fail safe enabled with false input """
+    ''' testing fail safe enabled with false input '''
     store_minify.fail_safe = True
     store_minify.cssless = False
     resp = client.get('/cssless_false')
@@ -112,7 +66,7 @@ def test_fail_safe(client):
 
 
 def test_fail_safe_false_input(client):
-    """testing fail safe disabled with false input """
+    '''testing fail safe disabled with false input '''
     try:
         client.get('/cssless_false')
     except Exception as e:
@@ -120,7 +74,7 @@ def test_fail_safe_false_input(client):
 
 
 def test_caching_limit_only_when_needed(client):
-    """test caching limit without any variations """
+    '''test caching limit without any variations '''
     store_minify.caching_limit = 5
     store_minify.cssless = True
     resp = [client.get('/cssless').data for i in range(10)]
@@ -131,7 +85,7 @@ def test_caching_limit_only_when_needed(client):
 
 
 def test_caching_limit_exceeding(client):
-    """test caching limit with multiple variations """
+    '''test caching limit with multiple variations '''
     resp = [client.get('/js/{}'.format(i)).data for i in range(10)]
 
     assert len(store_minify.cache.get('js_addition', {}))\
@@ -146,7 +100,7 @@ def test_caching_limit_exceeding(client):
 
 
 def test_bypass_caching(client):
-    """test endpoint bypassed not caching"""
+    '''test endpoint bypassed not caching'''
     store_minify.bypass_caching.append('cssless')
     resp = client.get('/cssless')
     resp_values = [
@@ -158,7 +112,7 @@ def test_bypass_caching(client):
 
 
 def test_bypassing_with_regex(client):
-    """test endpoint bypassed not minifying and not caching regex"""
+    '''test endpoint bypassed not minifying and not caching regex'''
     store_minify.bypass.append('css*')
     store_minify.bypass_caching.append('css*')
     store_minify.fail_safe = True
@@ -167,6 +121,38 @@ def test_bypassing_with_regex(client):
 
     assert resp == LESS
     assert resp_false == FALSE_LESS
+
+
+def test_passive_flag(client):
+    '''test disabling active minifying'''
+    store_minify.passive = True
+    resp = client.get('/html').data.decode('utf-8')
+
+    assert resp == HTML
+
+
+def test_html_minify_decorated(client):
+    '''test minifying html decorator'''
+    store_minify.passive = True
+    resp = client.get('/html_decorated').data
+
+    assert resp == MINIFED_HTML
+
+
+def test_javascript_minify_decorated(client):
+    '''test minifying javascript decorator'''
+    store_minify.passive = True
+    resp = client.get('/js_decorated').data
+
+    assert resp == MINIFIED_JS
+
+
+def test_minify_less_decorated(client):
+    '''test minifying css/less decorator'''
+    store_minify.passive = True
+    resp = client.get('/less_decorated').data
+
+    assert resp == MINIFED_LESS
 
 
 if __name__ == '__main__':

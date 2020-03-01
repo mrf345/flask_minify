@@ -2,7 +2,7 @@ from sys import path as sys_path
 from os import path
 from importlib import import_module
 
-from flask_minify.utils import (is_empty)
+from flask_minify.utils import (is_empty, is_html)
 
 
 sys_path.append(path.dirname(path.dirname(__file__)))
@@ -19,6 +19,11 @@ class TestUtils:
 
         assert is_empty('Not empty at all') is False
         assert is_empty('\n\t  \t\n\n' * 10) is True
+
+    def test_is_html(self):
+        ''' Test is_html check is correct '''
+        assert is_html(mock.Mock('application/json')) is False
+        assert is_html(mock.Mock(content_type='text/html')) is True
 
 
 class TestMinifyRequest:
