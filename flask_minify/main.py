@@ -82,7 +82,7 @@ class minify(object):
         -------
             The current Flask application.
         '''
-        return self._app or _app_ctx_stack.top
+        return self._app or (_app_ctx_stack.top and _app_ctx_stack.top.app)
 
     @property
     def endpoint(self):
