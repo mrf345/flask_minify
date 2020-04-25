@@ -1,7 +1,7 @@
-tests: install
-	py.test --cov=./flask_minify tests/*
 test: install
-	py.test --cov=./flask_minify tests/integration.py::$$u
+	nox --sesion test
+lint:
+	nox --sesion lint
 run: install
 	python tests/integration.py
 release: install clean
