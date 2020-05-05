@@ -1,7 +1,7 @@
 test: install
-	nox --sesion test
+	nox --session test
 lint:
-	nox --sesion lint
+	nox --session lint
 run: install
 	python tests/integration.py
 release: install clean
