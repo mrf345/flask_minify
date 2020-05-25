@@ -13,7 +13,7 @@
 <img src='https://img.shields.io/badge/code%20style-pep8-orange.svg' alt='Code Style' />
 <img src='https://img.shields.io/pypi/dm/flask_minify' alt='Number of downloads' />
 </p>
-<h3 align='center'>A Flask extension to minify flask response for html, javascript, css and less compilation as well.</h3>
+<h3 align='center'>A Flask extension to parse request's response and minify html, javascript, css and less.</h3>
 
 ## Install:
 #### - With pip
@@ -55,7 +55,7 @@ def example():
 def __init__(
         self, app=None, html=True, js=True, cssless=True,
         fail_safe=True, bypass=[], bypass_caching=[], caching_limit=1,
-        passive=False
+        passive=False, static=False
     ):
         ''' Extension to minify flask response for html, javascript, css and less.
 
@@ -64,7 +64,7 @@ def __init__(
             app: Flask.app
                 Flask app instance to be passed.
             js: bool
-                To minify the css output.
+                To minify the js output.
             cssless: bool
                 To minify spaces in css.
             fail_safe: bool
@@ -77,6 +77,8 @@ def __init__(
                 to limit the number of minified response variations.
             passive: bool
                 to disable active minifying.
+            statis: bool
+                to enable minifying static files css\less and js.
 
             NOTE: if `caching_limit` is set to 0, we'll not cache any endpoint
                   response, so if you want to disable caching just do that.

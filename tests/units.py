@@ -2,7 +2,7 @@ from sys import path as sys_path
 from os import path
 from importlib import import_module
 
-from flask_minify.utils import (is_empty, is_html)
+from flask_minify.utils import (is_empty, is_html, is_cssless, is_js)
 
 
 sys_path.append(path.dirname(path.dirname(__file__)))
@@ -24,6 +24,18 @@ class TestUtils:
         ''' Test is_html check is correct '''
         assert is_html(mock.Mock('application/json')) is False
         assert is_html(mock.Mock(content_type='text/html')) is True
+
+    def test_is_js(self):
+        ''' Test is_js check is correct '''
+        assert is_js(mock.Mock(content_type='text/html')) is False
+        assert is_js(mock.Mock(content_type='text/javascript')) is True
+        assert is_js(mock.Mock(content_type='application/javascript')) is True
+
+    def test_is_cssless(self):
+        ''' Test is_cssless check is correct '''
+        assert is_cssless(mock.Mock(content_type='text/javascript')) is False
+        assert is_cssless(mock.Mock(content_type='text/css')) is True
+        assert is_cssless(mock.Mock(content_type='text/less')) is True
 
 
 class TestMinifyRequest:

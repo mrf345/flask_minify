@@ -26,11 +26,31 @@ FALSE_LESS = '''<style>
         }
     </style>'''
 
+JS_RAW = '''
+console.warn(         [
+    'testing',
+
+    ' suite'    ]
+  );
+'''
+
+LESS_RAW = '''
+@a:     red;
+
+body    {
+    color:       @a;
+}
+'''
+
 MINIFED_HTML = b'<html> <body> <h1> HTML </h1> </body> </html>'
 
 MINIFIED_JS = b'<script>["J","S"].reduce(function(a,r){return a+r})</script>'
 
 MINIFED_LESS = b'<style>body{color:red;}</style>'
+
+MINIFIED_JS_RAW = b"console.warn(['testing',' suite']);"
+
+MINIFIED_LESS_RAW = b'body{color:red;}'
 
 
 def MINIFED_STRIPED(value):
