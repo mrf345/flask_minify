@@ -7,7 +7,7 @@ from htmlmin import minify as minify_html
 from lesscpy import compile as compile_less
 from jsmin import jsmin
 
-from flask_minify.utils import get_tag_contents, is_html
+from flask_minify.utils import get_tag_contents, is_html, is_cssless, is_js
 
 # optimized hashing speed based on cpu architecture
 hashing = xxh64 if maxsize > 2**32 else xxh32
@@ -17,7 +17,7 @@ class minify(object):
     def __init__(
         self, app=None, html=True, js=True, cssless=True,
         fail_safe=True, bypass=[], bypass_caching=[], caching_limit=1,
-        passive=False
+        passive=False, static=False
     ):
         ''' Extension to minify flask response for html, javascript, css and less.
 
@@ -26,7 +26,7 @@ class minify(object):
             app: Flask.app
                 Flask app instance to be passed.
             js: bool
-                To minify the css output.
+                To minify the js output.
             cssless: bool
                 To minify spaces in css.
             fail_safe: bool
@@ -39,9 +39,11 @@ class minify(object):
                 to limit the number of minifed response variations.
             passive: bool
                 to disable active minifying.
+            statis: bool
+                to enable minifying static files css, less and js.
 
             NOTE: if `caching_limit` is set to 0, we'll not cache any endpoint
-                  response, so if you want to disable caching just do that.
+                  responses, so if you want to disable caching just do that.
 
             EXAMPLE: endpoint is the name of the function decorated with the
                     `@app.route()` so in the following example the endpoint
@@ -71,6 +73,7 @@ class minify(object):
         self.cache = {}
         self._app = app
         self.passive = passive
+        self.static = static
 
         app and self.init_app(app)
 
@@ -218,19 +221,30 @@ class minify(object):
             Minified flask response if it fits the requirements.
         '''
         should_bypass = self.get_endpoint_matches(self.bypass) or self.passive
+        html = is_html(response)
+        cssless = is_cssless(response)
+        js = is_js(response)
 
-        if is_html(response) and not should_bypass:
+        if any([html, cssless, js]) and not should_bypass:
             response.direct_passthrough = False
             text = response.get_data(as_text=True)
 
-            for tag, enabled in self.iter_tags_to_minify(self.cssless,
-                                                         self.js):
-                if enabled:
-                    for content in get_tag_contents(text, tag):
-                        text = text.replace(content,
-                                            self.store_or_restore_cache
-                                            (content, tag))
+            if html:
+                for tag, enabled in self.iter_tags_to_minify(self.cssless,
+                                                             self.js):
+                    if enabled:
+                        for content in get_tag_contents(text, tag):
+                            text = text.replace(content,
+                                                self.store_or_restore_cache
+                                                (content, tag))
 
-            response.set_data(self.get_minified(text, 'html', self.fail_safe)
-                              if self.html else text)
+                response.set_data(
+                    self.get_minified(text, 'html', self.fail_safe)
+                    if self.html else text)
+            else:
+                response.set_data(
+                    self.get_minified(text,
+                                      'script' if js else 'style',
+                                      self.fail_safe))
+
         return response

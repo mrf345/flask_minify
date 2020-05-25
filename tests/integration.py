@@ -1,8 +1,11 @@
+import os
 from pytest import fixture
+from flask import send_from_directory
 
 from .setup import store_minify, app
 from .constants import (HTML, LESS, FALSE_LESS, MINIFED_HTML, MINIFIED_JS,
-                        MINIFED_LESS, MINIFED_STRIPED)
+                        MINIFED_LESS, MINIFED_STRIPED, MINIFIED_JS_RAW,
+                        MINIFIED_LESS_RAW, JS_RAW, LESS_RAW)
 
 
 @fixture
@@ -15,8 +18,20 @@ def client():
     store_minify.cache = {}
     store_minify.passive = False
     app.config['TESTING'] = True
-    client = app.test_client()
-    yield client
+
+    files = {'./test.js': JS_RAW,
+             './test.less': LESS_RAW}
+    files_items = getattr(files, 'iteritems', getattr(files, 'items', None))()
+
+    for f, c in files_items:
+        with open(f, 'w+') as file:
+            file.write(c)
+
+    with app.test_client() as client:
+        yield client
+
+    for f, c in files_items:
+        os.remove(f)
 
 
 def test_html_minify(client):
@@ -153,6 +168,40 @@ def test_minify_less_decorated(client):
     resp = client.get('/less_decorated').data
 
     assert resp == MINIFED_LESS
+
+
+def test_minify_static_js_with_add_url_rule(client):
+    '''test minifying static file js'''
+    f = '/test.js'
+
+    with app.app_context():
+        app.add_url_rule(
+            f, f,
+            lambda: send_from_directory('../.',
+                                        f[1:],
+                                        mimetype='application/javascript'))
+
+    store_minify.static = True
+    resp = client.get(f).data
+
+    assert resp == MINIFIED_JS_RAW
+
+
+def test_minify_static_less_with_add_url_rule(client):
+    '''test minifying static file less'''
+    f = '/test.less'
+
+    with app.app_context():
+        app.add_url_rule(
+            f, f,
+            lambda: send_from_directory('../.',
+                                        f[1:],
+                                        mimetype='application/less'))
+
+    store_minify.static = True
+    resp = client.get(f).data
+
+    assert resp == MINIFIED_LESS_RAW
 
 
 if __name__ == '__main__':

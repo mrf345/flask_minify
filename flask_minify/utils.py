@@ -37,7 +37,7 @@ def get_tag_contents(html, tag):
 
 
 def is_html(response):
-    ''' Check if Flask response if of HTML type.
+    ''' Check if Flask response of HTML content-type.
 
     Parameters
     ----------
@@ -50,3 +50,35 @@ def is_html(response):
     content_type = getattr(response, 'content_type', '')
 
     return 'text/html' in content_type.lower()
+
+
+def is_js(response):
+    ''' Check if Flask response of JS content-type.
+
+    Parameters
+    ----------
+        response: Flask response
+
+    Returns
+    -------
+        True if valid False if not.
+    '''
+    content_type = getattr(response, 'content_type', '')
+
+    return 'javascript' in content_type.lower()
+
+
+def is_cssless(response):
+    ''' Check if Flask response of Css or Less content-type.
+
+    Parameters
+    ----------
+        response: Flask response
+
+    Returns
+    -------
+        True if valid False if not.
+    '''
+    content_type = getattr(response, 'content_type', '')
+
+    return 'css' in content_type.lower() or 'less' in content_type.lower()
