@@ -1,39 +1,45 @@
-from setuptools import setup
 from os import path
-
-from flask_minify import __version__ as VERSION
-from flask_minify import __doc__ as DOC
+from setuptools import setup
 
 
-with open(path.join(path.abspath(path.dirname(__file__)), 'README.md'),
-          encoding='utf-8') as f:
-    long_description = f.read()
+basedir = path.abspath(path.dirname(__file__))
+long_description = ''
+requirements = []
+test_requirements = []
+
+
+with open(path.join(basedir, path.join('flask_minify', 'about.py'))) as f:
+    exec(f.read())
+
+with open(path.join(basedir, 'README.md')) as f:
+    long_description += f.read()
+
+with open(path.join(basedir, 'requirements/main.txt')) as f:
+    requirements += [l for l in f.read().split('\n') if l]
+    test_requirements += requirements
+
+with open(path.join(basedir, 'requirements/test.txt')) as f:
+    test_requirements += [l for l in f.read().split('\n') if l and not l.startswith('-r')]
 
 
 setup(
     name='Flask-Minify',
-    version=VERSION,
+    version=__version__,
     url='https://github.com/mrf345/flask_minify/',
     download_url='https://github.com/mrf345/flask_minify/archive/%s.tar.gz'
-    % VERSION,
-    license='MIT',
-    author='Mohamed Feddad',
-    author_email='mrf345@gmail.com',
-    description=DOC,
+    % __version__,
+    license=__license__,
+    author=__author__,
+    author_email=__email__,
+    description=__doc__,
     long_description=long_description,
     long_description_content_type='text/markdown',
-    py_modules=['minify'],
     packages=['flask_minify'],
     zip_safe=False,
     include_package_data=True,
     platforms='any',
-    install_requires=[
-        'Flask',
-        'htmlmin',
-        'jsmin',
-        'lesscpy',
-        'xxhash'
-    ],
+    install_requires=requirements,
+    setup_requires=test_requirements,
     keywords=['flask', 'extension', 'minifer', 'htmlmin', 'lesscpy',
               'jsmin', 'html', 'js', 'less', 'css'],
     classifiers=[
@@ -50,6 +56,5 @@ setup(
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
-    ],
-    setup_requires=['pytest-runner']
+    ]
 )

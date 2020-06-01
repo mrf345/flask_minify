@@ -16,7 +16,6 @@ mock = getattr(unittest, 'mock', None) or import_module('mock')
 class TestUtils:
     def test_is_empty(self):
         ''' Test is_empty check is correct '''
-
         assert is_empty('Not empty at all') is False
         assert is_empty('\n\t  \t\n\n' * 10) is True
 

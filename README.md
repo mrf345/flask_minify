@@ -77,37 +77,31 @@ def __init__(
                 to limit the number of minified response variations.
             passive: bool
                 to disable active minifying.
-            statis: bool
-                to enable minifying static files css\less and js.
+            static: bool
+                to enable minifying static files css, less and js.
 
-            NOTE: if `caching_limit` is set to 0, we'll not cache any endpoint
-                  response, so if you want to disable caching just do that.
+        Notes
+        -----
+        if `caching_limit` is set to 0, we'll not cache any endpoint responses,
+        so if you want to disable caching just do that.
 
-            EXAMPLE: endpoint is the name of the function decorated with the
-                    `@app.route()` so in the following example the endpoint
-                    will be `root`:
+        `endpoint` is the name of the function decorated with the
+        `@app.route()` so in the following example the endpoint will be `root`:
+            @app.route('/root/<id>')
+            def root(id):
+                return id
 
-                     @app.route('/root/<id>')
-                     def root(id):
-                         return id
+        when using a `Blueprint` the decorated endpoint will be suffixed with
+        the blueprint name; `Blueprint('blueprint_name')` so here the endpoint
+        will be `blueprint_name.root`.
 
-            NOTE: when using a `Blueprint` the decorated endpoint will be
-                  suffixed with the blueprint name;
-                  `Blueprint('blueprint_name')` so here the endpoint will be
-                  `blueprint_name.root`.
-
-                  `bypass` and `bypass_caching` can handle regex patterns so if
-                  you want to bypass all routes on a certain blueprint you can
-                  just pass the pattern as such:
-                  minify(app, bypass=['blueprint_name.*'])
+        `bypass` and `bypass_caching` can handle regex patterns so if you want
+        to bypass all routes on a certain blueprint you can just pass
+        the pattern as such:
+            minify(app, bypass=['blueprint_name.*'])
         '''
 ```
 
-## Credit:
-> - [htmlmin][1322354e]: HTML python minifier.
-> - [lesscpy][1322353e]: Python less compiler and css minifier.
-> - [jsmin][1322355e]: JavaScript python minifier.
-
-[1322353e]: https://github.com/lesscpy/lesscpy "lesscpy repo"
-[1322354e]: https://github.com/mankyd/htmlmin "htmlmin repo"
-[1322355e]: https://github.com/tikitu/jsmin "jsmin repo"
+## Development:
+- **Run Tests:** `python setup.py test`
+- **Run style checks:** `python setup.py lint`
