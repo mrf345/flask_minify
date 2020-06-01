@@ -1,5 +1,3 @@
 from .main import minify # noqa
 from . import decorators # noqa
-
-__version__ = '0.19'
-__doc__ = 'Flask extension to minify html, css, js and less.'
+from .about import (__license__, __version__, __author__, __doc__, __email__) # noqa

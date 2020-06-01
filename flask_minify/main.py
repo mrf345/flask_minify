@@ -14,6 +14,8 @@ hashing = xxh64 if maxsize > 2**32 else xxh32
 
 
 class minify(object):
+    'Extension to minify flask response for html, javascript, css and less.'
+
     def __init__(
         self, app=None, html=True, js=True, cssless=True,
         fail_safe=True, bypass=[], bypass_caching=[], caching_limit=1,
@@ -36,32 +38,31 @@ class minify(object):
             bypass_caching: list
                 list of endpoints to bypass caching for. (Regex)
             caching_limit: int
-                to limit the number of minifed response variations.
+                to limit the number of minified response variations.
             passive: bool
                 to disable active minifying.
-            statis: bool
+            static: bool
                 to enable minifying static files css, less and js.
 
-            NOTE: if `caching_limit` is set to 0, we'll not cache any endpoint
-                  responses, so if you want to disable caching just do that.
+        Notes
+        -----
+        if `caching_limit` is set to 0, we'll not cache any endpoint responses,
+        so if you want to disable caching just do that.
 
-            EXAMPLE: endpoint is the name of the function decorated with the
-                    `@app.route()` so in the following example the endpoint
-                    will be `root`:
+        `endpoint` is the name of the function decorated with the
+        `@app.route()` so in the following example the endpoint will be `root`:
+            @app.route('/root/<id>')
+            def root(id):
+                return id
 
-                     @app.route('/root/<id>')
-                     def root(id):
-                         return id
+        when using a `Blueprint` the decorated endpoint will be suffixed with
+        the blueprint name; `Blueprint('blueprint_name')` so here the endpoint
+        will be `blueprint_name.root`.
 
-            NOTE: when using a `Blueprint` the decorated endpoint will be
-                  suffixed with the blueprint name;
-                  `Blueprint('blueprint_name')` so here the endpoint will be
-                  `blueprint_name.root`.
-
-                  `bypass` and `bypass_caching` can handle regex patterns so if
-                  you want to bypass all routes on a certain blueprint you can
-                  just pass the pattern as such:
-                  minify(app, bypass=['blueprint_name.*'])
+        `bypass` and `bypass_caching` can handle regex patterns so if you want
+        to bypass all routes on a certain blueprint you can just pass
+        the pattern as such:
+            minify(app, bypass=['blueprint_name.*'])
         '''
         self.html = html
         self.js = js
