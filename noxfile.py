@@ -1,6 +1,6 @@
 import nox
 
-SUPPORTED_VERSIONS = ['3.5', '3.6', '3.7', '3.8']
+SUPPORTED_VERSIONS = ['2.7', '3.5', '3.6', '3.7', '3.8']
 
 
 @nox.session(python=SUPPORTED_VERSIONS)
