@@ -3,6 +3,7 @@ from os import path
 from importlib import import_module
 
 from flask_minify.utils import (is_empty, is_html, is_cssless, is_js)
+from .constants import (JS_TEMPLATE_LITERALS, MINIFIED_JS_TEMPLATE_LITERALS)
 
 
 sys_path.append(path.dirname(path.dirname(__file__)))
@@ -35,6 +36,11 @@ class TestUtils:
         assert is_cssless(mock.Mock(content_type='text/javascript')) is False
         assert is_cssless(mock.Mock(content_type='text/css')) is True
         assert is_cssless(mock.Mock(content_type='text/less')) is True
+
+    def test_jsmin_template_literals(self):
+        ''' Test `jsmin` template literals white spaces sanity '''
+
+        assert minify.get_minified(JS_TEMPLATE_LITERALS, 'script') == MINIFIED_JS_TEMPLATE_LITERALS
 
 
 class TestMinifyRequest:
