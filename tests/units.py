@@ -40,7 +40,8 @@ class TestUtils:
     def test_jsmin_template_literals(self):
         ''' Test `jsmin` template literals white spaces sanity '''
 
-        assert minify.get_minified(JS_TEMPLATE_LITERALS, 'script') == MINIFIED_JS_TEMPLATE_LITERALS
+        assert minify.get_minified(JS_TEMPLATE_LITERALS, 'script')\
+            == MINIFIED_JS_TEMPLATE_LITERALS
 
 
 class TestMinifyRequest:

@@ -6,6 +6,7 @@ basedir = path.abspath(path.dirname(__file__))
 long_description = ''
 requirements = []
 test_requirements = []
+requirements_path = path.join(basedir, 'requirements')
 
 
 with open(path.join(basedir, path.join('flask_minify', 'about.py'))) as f:
@@ -14,24 +15,26 @@ with open(path.join(basedir, path.join('flask_minify', 'about.py'))) as f:
 with open(path.join(basedir, 'README.md')) as f:
     long_description += f.read()
 
-with open(path.join(basedir, 'requirements/main.txt')) as f:
-    requirements += [l for l in f.read().split('\n') if l]
+with open(path.join(requirements_path, 'main.txt')) as f:
+    requirements += [line for line in f.read().split('\n') if line]
     test_requirements += requirements
 
-with open(path.join(basedir, 'requirements/test.txt')) as f:
-    test_requirements += [l for l in f.read().split('\n') if l and not l.startswith('-r')]
+with open(path.join(requirements_path, 'test.txt')) as f:
+    test_requirements += [
+        line for line in f.read().split('\n')
+        if line and not line.startswith('-r')]
 
 
 setup(
     name='Flask-Minify',
-    version=__version__,
+    version=__version__,  # noqa
     url='https://github.com/mrf345/flask_minify/',
     download_url='https://github.com/mrf345/flask_minify/archive/%s.tar.gz'
-    % __version__,
-    license=__license__,
-    author=__author__,
-    author_email=__email__,
-    description=__doc__,
+    % __version__,  # noqa
+    license=__license__,  # noqa
+    author=__author__,  # noqa
+    author_email=__email__,  # noqa
+    description=__doc__,  # noqa
     long_description=long_description,
     long_description_content_type='text/markdown',
     packages=['flask_minify'],

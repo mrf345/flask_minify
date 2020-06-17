@@ -57,7 +57,8 @@ MINIFIED_JS_RAW = b"console.warn(['testing',' suite']);"
 
 MINIFIED_LESS_RAW = b'body{color:red;}'
 
-MINIFIED_JS_TEMPLATE_LITERALS = "const a='something';const b=` more  than    ${a}  `"
+MINIFIED_JS_TEMPLATE_LITERALS =\
+    "const a='something';const b=` more  than    ${a}  `"
 
 
 def MINIFED_STRIPED(value):
