@@ -150,7 +150,9 @@ class minify(object):
                                     minify=True,
                                     xminify=True)
             elif tag == 'script':
-                return jsmin(content).replace('\n', ';')
+                return jsmin(content,
+                             quote_chars="'\"`"
+                             ).replace('\n', ';')
             else:
                 return minify_html(content)
 

@@ -103,5 +103,5 @@ def __init__(
 ```
 
 ## Development:
-- **Run Tests:** `python setup.py test`
-- **Run style checks:** `python setup.py lint`
+- **Run Tests:** `flake8`
+- **Run style checks:** `pytest`

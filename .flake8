@@ -1,0 +1,3 @@
+[flake8]
+exclude = .eggs,.nox,.venv,__pycache__,*.pyc
+max-complexity = 20
