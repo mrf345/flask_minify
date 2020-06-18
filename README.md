@@ -103,5 +103,5 @@ def __init__(
 ```
 
 ## Development:
-- **Run Tests:** `flake8`
-- **Run style checks:** `pytest`
+- **Run Tests:** `pytest`
+- **Run style checks:** `flake8`
