@@ -4,8 +4,8 @@ from flask import send_from_directory
 
 from .setup import store_minify, app
 from .constants import (HTML, LESS, FALSE_LESS, MINIFED_HTML, MINIFIED_JS,
-                        MINIFED_LESS, MINIFED_STRIPED, MINIFIED_JS_RAW,
-                        MINIFIED_LESS_RAW, JS_RAW, LESS_RAW)
+                        MINIFED_LESS, MINIFIED_JS_RAW, MINIFIED_LESS_RAW,
+                        JS_RAW, LESS_RAW)
 
 
 @fixture
@@ -67,7 +67,7 @@ def test_minify_cache(client):
     resp = client.get('/cssless').data
 
     assert resp == MINIFED_LESS
-    assert MINIFED_STRIPED('MINIFED_LESS').decode('utf-8') in\
+    assert MINIFED_LESS.decode('utf-8') in\
         store_minify.cache.get('cssless', {}).values()
 
 
@@ -101,17 +101,14 @@ def test_caching_limit_only_when_needed(client):
 
 def test_caching_limit_exceeding(client):
     '''test caching limit with multiple variations '''
+    store_minify.caching_limit = 4
     resp = [client.get('/js/{}'.format(i)).data for i in range(10)]
 
     assert len(store_minify.cache.get('js_addition', {}))\
         == store_minify.caching_limit
-    for i, r in enumerate(resp[:store_minify.caching_limit]):
-        assert bytes((
-            '<script>["J","S"].reduce(function(a,r){return a+r});' +
-            str(i) + '</script>').encode('utf-8')) == r
-        assert r in [
-            bytes(('<script>' + c + '</script>').encode('utf-8')) for c in
-            store_minify.cache.get('js_addition', {}).values()]
+
+    for v in store_minify.cache.get('js_addition', {}).values():
+        assert bytes(v.encode('utf-8')) in resp
 
 
 def test_bypass_caching(client):
@@ -182,9 +179,14 @@ def test_minify_static_js_with_add_url_rule(client):
                                         mimetype='application/javascript'))
 
     store_minify.static = True
-    resp = client.get(f).data
+    assert client.get(f).data == MINIFIED_JS_RAW
 
-    assert resp == MINIFIED_JS_RAW
+    store_minify.static = False
+    assert client.get(f).data.decode('utf-8') == JS_RAW
+
+    store_minify.static = True
+    store_minify.js = False
+    assert client.get(f).data.decode('utf-8') == JS_RAW
 
 
 def test_minify_static_less_with_add_url_rule(client):
@@ -199,9 +201,14 @@ def test_minify_static_less_with_add_url_rule(client):
                                         mimetype='application/less'))
 
     store_minify.static = True
-    resp = client.get(f).data
+    assert client.get(f).data == MINIFIED_LESS_RAW
 
-    assert resp == MINIFIED_LESS_RAW
+    store_minify.static = False
+    assert client.get(f).data.decode('utf-8') == LESS_RAW
+
+    store_minify.static = True
+    store_minify.cssless = False
+    assert client.get(f).data.decode('utf-8') == LESS_RAW
 
 
 if __name__ == '__main__':
