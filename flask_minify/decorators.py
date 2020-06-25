@@ -1,6 +1,6 @@
 from functools import wraps
 
-from .main import hashing, minify as main
+from .main import hashing, Minify as main
 from .utils import get_tag_contents
 
 

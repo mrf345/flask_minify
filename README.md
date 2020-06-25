@@ -54,8 +54,8 @@ def example():
 ```python
 def __init__(
         self, app=None, html=True, js=True, cssless=True,
-        fail_safe=True, bypass=[], bypass_caching=[], caching_limit=1,
-        passive=False, static=False
+        fail_safe=True, bypass=[], bypass_caching=[], caching_limit=2,
+        passive=False, static=True
     ):
         ''' Extension to minify flask response for html, javascript, css and less.
 
