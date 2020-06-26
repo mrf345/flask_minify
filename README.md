@@ -61,24 +61,24 @@ def __init__(
 
         Parameters
         ----------
-            app: Flask.app
-                Flask app instance to be passed.
-            js: bool
-                To minify the js output.
-            cssless: bool
-                To minify spaces in css.
-            fail_safe: bool
-                to avoid raising error while minifying.
-            bypass: list
-                list of endpoints to bypass minifying for. (Regex)
-            bypass_caching: list
-                list of endpoints to bypass caching for. (Regex)
-            caching_limit: int
-                to limit the number of minified response variations.
-            passive: bool
-                to disable active minifying.
-            static: bool
-                to enable minifying static files css, less and js.
+        app: Flask.app
+            Flask app instance to be passed.
+        js: bool
+            To minify the js output.
+        cssless: bool
+            To minify spaces in css.
+        fail_safe: bool
+            to avoid raising error while minifying.
+        bypass: list
+            list of endpoints to bypass minifying for. (Regex)
+        bypass_caching: list
+            list of endpoints to bypass caching for. (Regex)
+        caching_limit: int
+            to limit the number of minified response variations.
+        passive: bool
+            to disable active minifying.
+        static: bool
+            to enable minifying static files css, less and js.
 
         Notes
         -----
