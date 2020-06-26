@@ -13,7 +13,7 @@ def client():
     store_minify.fail_safe = False
     store_minify.cssless = True
     store_minify.js = True
-    store_minify.caching_limit = 1
+    store_minify.caching_limit = 0
     store_minify.bypass_caching = []
     store_minify.cache = {}
     store_minify.passive = False

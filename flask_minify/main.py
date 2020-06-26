@@ -202,13 +202,15 @@ class Minify(object):
         str
             stored or restored minifed content.
         '''
+        def _cache_dict():
+            return self.cache.get(self.endpoint, {})
+
         key = hashing(content).hexdigest()
         bypassed = bool(self.get_endpoint_matches(self.bypass_caching))
-        limit_reached = len(self.cache.get(self.endpoint,
-                                           {})) >= self.caching_limit
+        limit_reached = len(_cache_dict()) >= self.caching_limit
 
         def _cached():
-            return self.cache.get(self.endpoint, {}).get(key)
+            return _cache_dict().get(key)
 
         def _minified():
             return self.get_minified(content,
@@ -217,7 +219,9 @@ class Minify(object):
                                      ) if minify else content
 
         if not _cached() and not bypassed:
-            limit_reached and self.cache[self.endpoint].popitem()
+            if limit_reached and _cache_dict():
+                _cache_dict().popitem()
+
             self.cache\
                 .setdefault(self.endpoint, {})\
                 .update({key: _minified()})
