@@ -101,7 +101,12 @@ class Minify(object):
             the current endpoint.
         '''
         with self.app.app_context():
-            return getattr(request, 'endpoint', '') or ''
+            path = getattr(request, 'endpoint', '') or ''
+
+            if path == 'static':
+                path = getattr(request, 'path', '') or ''
+
+            return path
 
     def init_app(self, app):
         ''' Handle initiation of multiple apps NOTE:Factory Method'''
@@ -182,7 +187,7 @@ class Minify(object):
         '''
         matches = [compiled_pattern for compiled_pattern in
                    [compile_re(pattern) for pattern in patterns]
-                   if compiled_pattern.match(self.endpoint)]
+                   if compiled_pattern.search(self.endpoint)]
 
         return matches
 
