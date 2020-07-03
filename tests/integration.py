@@ -14,13 +14,15 @@ def client():
     store_minify.cssless = True
     store_minify.js = True
     store_minify.caching_limit = 0
+    store_minify.bypass = []
     store_minify.bypass_caching = []
     store_minify.cache = {}
     store_minify.passive = False
     app.config['TESTING'] = True
 
     files = {'./test.js': JS_RAW,
-             './test.less': LESS_RAW}
+             './test.less': LESS_RAW,
+             './test.bypass.css': LESS_RAW}
     files_items = getattr(files, 'iteritems', getattr(files, 'items', None))()
 
     for f, c in files_items:
@@ -208,6 +210,24 @@ def test_minify_static_less_with_add_url_rule(client):
 
     store_minify.static = True
     store_minify.cssless = False
+    assert client.get(f).data.decode('utf-8') == LESS_RAW
+
+
+def test_bypass_minify_static_file(client):
+    '''test bypassing css file minifying'''
+    f = '/test.bypass.css'
+
+    with app.app_context():
+        app.add_url_rule(
+            f, f,
+            lambda: send_from_directory('../.',
+                                        f[1:],
+                                        mimetype='application/css'))
+
+    store_minify.static = True
+    assert client.get(f).data == MINIFIED_LESS_RAW
+
+    store_minify.bypass = ['bypass.*']
     assert client.get(f).data.decode('utf-8') == LESS_RAW
 
 
