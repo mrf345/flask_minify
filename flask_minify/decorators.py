@@ -1,7 +1,6 @@
 from functools import wraps
 
 from .main import hashing, Minify as main
-from .utils import get_tag_contents
 
 
 def minify(html=False, js=False, cssless=False, cache=True, fail_safe=True):
@@ -38,16 +37,8 @@ def minify(html=False, js=False, cssless=False, cache=True, fail_safe=True):
                     key = hashing(text).hexdigest()
 
                 if cache_key != key or not cache:
-                    for tag, enabled in main.iter_tags_to_minify(cssless, js):
-                        for content in get_tag_contents(text, tag):
-                            text = text.replace(
-                                content,
-                                main.get_minified(content,
-                                                  tag,
-                                                  fail_safe))
-
-                    if html:
-                        text = main.get_minified(text, 'html', fail_safe)
+                    text = main.get_minified(text, 'html', fail_safe,
+                                             not html, cssless, js)
 
                     if cache:
                         function.__dict__['minify'] = (hashing(response_text)

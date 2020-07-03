@@ -58,12 +58,12 @@ def html_decorated():
 
 
 @app.route('/js_decorated')
-@decorator(html=True)
+@decorator(html=True, js=True)
 def js_decorated():
     return JS
 
 
 @app.route('/less_decorated')
-@decorator(html=True)
+@decorator(html=True, cssless=True)
 def less_decorated():
     return LESS

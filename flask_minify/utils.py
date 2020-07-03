@@ -82,3 +82,21 @@ def is_cssless(response):
     content_type = getattr(response, 'content_type', '')
 
     return 'css' in content_type.lower() or 'less' in content_type.lower()
+
+
+def iter_tags_to_minify(cssless, js):
+    ''' Safely iterate html tags to minify, if tag's enabled.
+    Parameters
+    ----------
+    cssless: bool
+        to enable css and less.
+    js: bool
+        to enable javascript.
+    Returns
+    -------
+    list
+        html's tag and its status.
+    '''
+    tags = {'style': cssless, 'script': js}
+
+    return getattr(tags, 'iteritems', tags.items)()

@@ -7,7 +7,9 @@ from htmlmin import minify as minify_html
 from lesscpy import compile as compile_less
 from jsmin import jsmin
 
-from flask_minify.utils import get_tag_contents, is_html, is_cssless, is_js
+from flask_minify.utils import (get_tag_contents, is_html, is_cssless, is_js,
+                                iter_tags_to_minify)
+
 
 # optimized hashing speed based on cpu architecture
 hashing = xxh64 if maxsize > 2**32 else xxh32
@@ -111,27 +113,9 @@ class Minify(object):
         pass
 
     @classmethod
-    def iter_tags_to_minify(cls, cssless, js):
-        ''' Safely iterate html tags to minify, if tag's enabled.
-
-        Parameters
-        ----------
-        cssless: bool
-            to enable css and less.
-        js: bool
-            to enable javascript.
-
-        Returns
-        -------
-        list
-            html's tag and its status.
-        '''
-        tags = {'style': cssless, 'script': js}
-
-        return getattr(tags, 'iteritems', tags.items)()
-
-    @classmethod
-    def get_minified(cls, content, tag, fail_safe=False):
+    def get_minified(cls, content, tag, fail_safe=False,
+                     only_html_content=False, html_cssless=False,
+                     html_js=False):
         ''' To minify css/less or javascript and failsafe that.
 
         Parameters
@@ -142,6 +126,12 @@ class Minify(object):
             if the content belongs to a style html tag.
         failsafe: bool
             to avoid raising error while minifying.
+        only_html_content: bool
+            to skip minifying the HTML tag and just minify its content.
+        html_cssless: bool
+            to minify html inner css/less.
+        html_js: bool
+            to minify html inner js.
 
         Returns
         -------
@@ -155,10 +145,21 @@ class Minify(object):
                                     xminify=True)
             elif tag == 'script':
                 return jsmin(content,
-                             quote_chars="'\"`"
-                             ).replace('\n', ';')
+                             quote_chars="'\"`").replace('\n', ';')
+            elif tag == 'html':
+                for tag, enabled in iter_tags_to_minify(html_cssless,
+                                                        html_js):
+                    if enabled:
+                        for sub_content in get_tag_contents(content, tag):
+                            content = content.replace(sub_content,
+                                                      cls.get_minified(
+                                                          sub_content,
+                                                          tag,
+                                                          fail_safe))
+
+                return content if only_html_content else minify_html(content)
             else:
-                return minify_html(content)
+                raise AttributeError('Unknown HTML tag')
 
         except Exception as exception:
             if fail_safe:
@@ -185,7 +186,7 @@ class Minify(object):
 
         return matches
 
-    def get_minified_or_cached(self, content, tag, minify=True):
+    def get_minified_or_cached(self, content, tag):
         ''' Check if the content is already cached and restore or store it.
 
         Parameters
@@ -194,8 +195,6 @@ class Minify(object):
             a script or style html tag content.
         tag: bool
             html tag the content belongs to.
-        minify: bool
-            minify content, before caching it.
 
         Returns
         -------
@@ -215,8 +214,10 @@ class Minify(object):
         def _minified():
             return self.get_minified(content,
                                      tag,
-                                     self.fail_safe
-                                     ) if minify else content
+                                     self.fail_safe,
+                                     not self.html,
+                                     self.cssless,
+                                     self.js)
 
         if not _cached() and not bypassed:
             if limit_reached and _cache_dict():
@@ -254,26 +255,10 @@ class Minify(object):
             response.direct_passthrough = False
             text = response.get_data(as_text=True)
 
-            if html:
-                for tag, enabled in self.iter_tags_to_minify(self.cssless,
-                                                             self.js):
-                    if enabled:
-                        for content in get_tag_contents(text, tag):
-                            text = text.replace(content,
-                                                self.get_minified(
-                                                    content,
-                                                    tag,
-                                                    self.fail_safe))
-
-                response.set_data(self.get_minified_or_cached(text,
-                                                              'html',
-                                                              self.html))
-            else:
-                if self.static:
-                    response.set_data(
-                        self.get_minified_or_cached(text,
-                                                    'script'
-                                                    if js else
-                                                    'style'))
+            if html or (self.static and any([cssless, js])):
+                response.set_data(
+                    self.get_minified_or_cached(text,
+                                                'html' if html else
+                                                'script' if js else 'style'))
 
         return response
