@@ -31,8 +31,6 @@ class Minify(object):
             Flask app instance to be passed.
         js: bool
             To minify the js output.
-        script_types: list
-            list of script types to limit js minification to.
         cssless: bool
             To minify spaces in css.
         fail_safe: bool
@@ -47,6 +45,8 @@ class Minify(object):
             to disable active minifying.
         static: bool
             to enable minifying static files css, less and js.
+        script_types: list
+            list of script types to limit js minification to.
 
         Notes
         -----
@@ -67,6 +67,9 @@ class Minify(object):
         to bypass all routes on a certain blueprint you can just pass
         the pattern as such:
             minify(app, bypass=['blueprint_name.*'])
+
+        when whitelisting script types, include '' (empty string) in the list
+        to include script blocks which are missing the type attribute.
         '''
         self.html = html
         self.js = js
