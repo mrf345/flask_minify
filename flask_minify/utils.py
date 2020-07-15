@@ -41,14 +41,13 @@ def is_valid_tag_content(tag, opening_tag_html, content, script_types):
         tag_no_quotes = opening_tag_html.replace('"', '')\
                                         .replace("'", '')\
                                         .lower()
+
         if '' in script_types:
             if 'type=' not in tag_no_quotes:
                 return True
-            while '' in script_types:
-                script_types.remove('')
 
         valid_types = ['type={}'.format(script_type)
-                       for script_type in script_types]
+                       for script_type in script_types if script_type != '']
 
         if not any(valid_type in tag_no_quotes for valid_type in valid_types):
             return False
