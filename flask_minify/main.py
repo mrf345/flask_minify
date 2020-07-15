@@ -68,7 +68,7 @@ class Minify(object):
         the pattern as such:
             minify(app, bypass=['blueprint_name.*'])
 
-        when using `script_types` include '' (empty string) in the list to 
+        when using `script_types` include '' (empty string) in the list to
         include script blocks which are missing the type attribute.
         '''
         self.html = html
