@@ -19,9 +19,9 @@ class Minify(object):
     'Extension to minify flask response for html, javascript, css and less.'
 
     def __init__(
-        self, app=None, html=True, js=True, script_types=[], cssless=True,
+        self, app=None, html=True, js=True, cssless=True,
         fail_safe=True, bypass=[], bypass_caching=[], caching_limit=2,
-        passive=False, static=True
+        passive=False, static=True, script_types=[]
     ):
         ''' Extension to minify flask response for html, javascript, css and less.
 
