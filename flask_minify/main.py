@@ -19,7 +19,7 @@ class Minify(object):
     'Extension to minify flask response for html, javascript, css and less.'
 
     def __init__(
-        self, app=None, html=True, js=True, cssless=True,
+        self, app=None, html=True, js=True, script_types=[], cssless=True,
         fail_safe=True, bypass=[], bypass_caching=[], caching_limit=2,
         passive=False, static=True
     ):
@@ -31,6 +31,8 @@ class Minify(object):
             Flask app instance to be passed.
         js: bool
             To minify the js output.
+        script_types: list
+            list of script types to limit js minification to.
         cssless: bool
             To minify spaces in css.
         fail_safe: bool
@@ -68,6 +70,7 @@ class Minify(object):
         '''
         self.html = html
         self.js = js
+        self.script_types = script_types
         self.cssless = cssless
         self.fail_safe = fail_safe
         self.bypass = bypass
@@ -120,7 +123,7 @@ class Minify(object):
     @classmethod
     def get_minified(cls, content, tag, fail_safe=False,
                      only_html_content=False, html_cssless=False,
-                     html_js=False):
+                     html_js=False, script_types=[]):
         ''' To minify css/less or javascript and failsafe that.
 
         Parameters
@@ -137,6 +140,8 @@ class Minify(object):
             to minify html inner css/less.
         html_js: bool
             to minify html inner js.
+        script_types: list
+            list of script types to limit js minification to.
 
         Returns
         -------
@@ -155,12 +160,15 @@ class Minify(object):
                 for tag, enabled in iter_tags_to_minify(html_cssless,
                                                         html_js):
                     if enabled:
-                        for sub_content in get_tag_contents(content, tag):
+                        for sub_content in get_tag_contents(content,
+                                                            tag,
+                                                            script_types):
                             content = content.replace(sub_content,
                                                       cls.get_minified(
                                                           sub_content,
                                                           tag,
-                                                          fail_safe))
+                                                          fail_safe,
+                                                          script_types))
 
                 return content if only_html_content else minify_html(content)
             else:
@@ -222,7 +230,8 @@ class Minify(object):
                                      self.fail_safe,
                                      not self.html,
                                      self.cssless,
-                                     self.js)
+                                     self.js,
+                                     self.script_types)
 
         if not _cached() and not bypassed:
             if limit_reached and _cache_dict():
