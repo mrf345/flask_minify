@@ -6,4 +6,3 @@ coverage
 python-coveralls
 mock
 flake8
-colorlog
