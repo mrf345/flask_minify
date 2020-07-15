@@ -102,8 +102,8 @@ def __init__(
         the pattern as such:
             minify(app, bypass=['blueprint_name.*'])
 
-        when whitelisting script types, include '' (empty string) in the list
-        to include script blocks which are missing the type attribute.
+        when using `script_types` include '' (empty string) in the list to 
+        include script blocks which are missing the type attribute.
         '''
 ```
 
