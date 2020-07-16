@@ -4,8 +4,8 @@ from flask import send_from_directory
 
 from .setup import store_minify, app
 from .constants import (HTML, LESS, FALSE_LESS, MINIFED_HTML, MINIFIED_JS,
-                        MINIFED_LESS, MINIFIED_JS_RAW, MINIFIED_LESS_RAW,
-                        JS_RAW, LESS_RAW)
+                        MINIFED_LESS, MINIFIED_JS_RAW, MINIFIED_LESS_RAW, JS,
+                        JS_RAW, LESS_RAW, JS_WITH_TYPE, MINIFIED_JS_WITH_TYPE)
 
 
 @fixture
@@ -18,6 +18,7 @@ def client():
     store_minify.bypass_caching = []
     store_minify.cache = {}
     store_minify.passive = False
+    store_minify.script_types = []
     app.config['TESTING'] = True
 
     files = {'./test.js': JS_RAW,
@@ -229,6 +230,20 @@ def test_bypass_minify_static_file(client):
 
     store_minify.bypass = ['bypass.*']
     assert client.get(f).data.decode('utf-8') == LESS_RAW
+
+
+def test_script_types(client):
+    '''test script types with empty type.'''
+    store_minify.script_types = ['application/javascript']
+    assert client.get('/js').data == bytes(JS.encode('utf-8'))
+
+    store_minify.script_types = ['application/javascript']
+    assert client.get('/js_with_type').data == MINIFIED_JS_WITH_TYPE
+
+    store_minify.cache = {}
+    store_minify.script_types = ['testing', 'text/javascript']
+    assert client.get(
+        '/js_with_type').data == bytes(JS_WITH_TYPE.encode('utf-8'))
 
 
 if __name__ == '__main__':

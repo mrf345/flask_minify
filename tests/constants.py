@@ -13,6 +13,13 @@ JS = '''<script>
             })
     </script>'''
 
+JS_WITH_TYPE = '''<script type="application/javascript">
+        ["J", "S"].reduce(
+            function (a, r) {
+                return a + r
+            })
+    </script>'''
+
 LESS = '''<style>
         @a: red;
         body {
@@ -50,6 +57,9 @@ const b = ` more  than    ${a}  `
 MINIFED_HTML = b'<html> <body> <h1> HTML </h1> </body> </html>'
 
 MINIFIED_JS = b'<script>["J","S"].reduce(function(a,r){return a+r})</script>'
+
+MINIFIED_JS_WITH_TYPE = (b'<script type="application/javascript">["J","S"].'
+                         b'reduce(function(a,r){return a+r})</script>')
 
 MINIFED_LESS = b'<style>body{color:red;}</style>'
 

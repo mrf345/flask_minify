@@ -3,7 +3,7 @@ from os import path
 from importlib import import_module
 from flask import Flask
 
-from .constants import HTML, JS, LESS, FALSE_LESS
+from .constants import HTML, JS, LESS, FALSE_LESS, JS_WITH_TYPE
 
 
 sys_path.append(path.dirname(path.dirname(__file__)))
@@ -29,6 +29,11 @@ def bypassed():
 @app.route('/js')
 def js():
     return JS
+
+
+@app.route('/js_with_type')
+def js_with_type():
+    return JS_WITH_TYPE
 
 
 @app.route('/cssless')
