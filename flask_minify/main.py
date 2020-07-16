@@ -173,7 +173,10 @@ class Minify(object):
                                                           fail_safe,
                                                           script_types))
 
-                return content if only_html_content else minify_html(content)
+                return content if only_html_content else minify_html(
+                    content,
+                    remove_comments=True,
+                    remove_optional_attribute_quotes=False)
             else:
                 raise AttributeError('Unknown HTML tag')
 
