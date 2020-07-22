@@ -71,7 +71,7 @@ def get_tag_contents(html, tag, script_types):
     -------
         String of specific tag's inner content.
     '''
-    contents = compile_re(r'(<{0}[^>]*>)(.+?)</{0}>'
+    contents = compile_re(r'(<{0}[^>]*>)(.*?)</{0}>'
                           .format(tag), DOTALL).findall(html)
 
     return [content[1] for content in contents
