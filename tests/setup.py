@@ -3,7 +3,8 @@ from os import path
 from importlib import import_module
 from flask import Flask
 
-from .constants import HTML, JS, LESS, FALSE_LESS, JS_WITH_TYPE
+from .constants import (HTML, JS, LESS, FALSE_LESS, JS_WITH_TYPE,
+                        HTML_EMBEDDED_TAGS)
 
 
 sys_path.append(path.dirname(path.dirname(__file__)))
@@ -72,3 +73,8 @@ def js_decorated():
 @decorator(html=True, cssless=True)
 def less_decorated():
     return LESS
+
+
+@app.route('/html_embedded')
+def html_embedded():
+    return HTML_EMBEDDED_TAGS

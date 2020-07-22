@@ -54,6 +54,17 @@ const a = 'something'
 const b = ` more  than    ${a}  `
 '''
 
+HTML_EMBEDDED_TAGS = '\n'.join([
+    '<html>',
+    JS,
+    '<script type="text/script" src="testing/88.js"></script>',
+    LESS,
+    '<script type="application/script" src="testing/1.js"></script>',
+    JS,
+    '<script src="testing/nested/2.js"></script>',
+    '</html>'
+])
+
 MINIFED_HTML = b'<html> <body> <h1> HTML </h1> </body> </html>'
 
 MINIFIED_JS = b'<script>["J","S"].reduce(function(a,r){return a+r})</script>'
@@ -69,3 +80,13 @@ MINIFIED_LESS_RAW = b'body{color:red;}'
 
 MINIFIED_JS_TEMPLATE_LITERALS =\
     "const a='something';const b=` more  than    ${a}  `"
+
+
+MINIFED_HTML_EMBEDDED_TAGS = bytes(''.join([
+    '<html> ',
+    MINIFIED_JS.decode('utf-8'),
+    ' <script type="text/script" src="testing/88.js"></script> ',
+    MINIFED_LESS.decode('utf-8'),
+    ' <script type="application/script" src="testing/1.js"></script> ',
+    MINIFIED_JS.decode('utf-8'),
+    ' <script src="testing/nested/2.js"></script> </html>']).encode('utf-8'))

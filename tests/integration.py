@@ -5,7 +5,8 @@ from flask import send_from_directory
 from .setup import store_minify, app
 from .constants import (HTML, LESS, FALSE_LESS, MINIFED_HTML, MINIFIED_JS,
                         MINIFED_LESS, MINIFIED_JS_RAW, MINIFIED_LESS_RAW, JS,
-                        JS_RAW, LESS_RAW, JS_WITH_TYPE, MINIFIED_JS_WITH_TYPE)
+                        JS_RAW, LESS_RAW, JS_WITH_TYPE, MINIFIED_JS_WITH_TYPE,
+                        MINIFED_HTML_EMBEDDED_TAGS)
 
 
 @fixture
@@ -244,6 +245,11 @@ def test_script_types(client):
     store_minify.script_types = ['testing', 'text/javascript']
     assert client.get(
         '/js_with_type').data == bytes(JS_WITH_TYPE.encode('utf-8'))
+
+
+def test_html_with_embedded_tags(client):
+    '''test html with embedded js and less tags'''
+    assert client.get('/html_embedded').data == MINIFED_HTML_EMBEDDED_TAGS
 
 
 if __name__ == '__main__':
