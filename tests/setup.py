@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from sys import path as sys_path
 from os import path
 from importlib import import_module
@@ -78,3 +79,8 @@ def less_decorated():
 @app.route('/html_embedded')
 def html_embedded():
     return HTML_EMBEDDED_TAGS
+
+
+@app.route('/unicode')
+def unicode_endpoint():
+    return u'–'
