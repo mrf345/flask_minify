@@ -223,7 +223,7 @@ class Minify(object):
         def _cache_dict():
             return self.cache.get(self.endpoint, {})
 
-        key = hashing(content).hexdigest()
+        key = hashing(content.encode('utf-8')).hexdigest()
         bypassed = bool(self.get_endpoint_matches(self.bypass_caching))
         limit_reached = len(_cache_dict()) >= self.caching_limit
 

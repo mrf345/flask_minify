@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import os
+import sys
 from pytest import fixture
 from flask import send_from_directory
 
@@ -7,6 +9,9 @@ from .constants import (HTML, LESS, FALSE_LESS, MINIFED_HTML, MINIFIED_JS,
                         MINIFED_LESS, MINIFIED_JS_RAW, MINIFIED_LESS_RAW, JS,
                         JS_RAW, LESS_RAW, JS_WITH_TYPE, MINIFIED_JS_WITH_TYPE,
                         MINIFED_HTML_EMBEDDED_TAGS)
+
+
+PY2 = sys.version_info.major == 2
 
 
 @fixture
@@ -250,6 +255,14 @@ def test_script_types(client):
 def test_html_with_embedded_tags(client):
     '''test html with embedded js and less tags'''
     assert client.get('/html_embedded').data == MINIFED_HTML_EMBEDDED_TAGS
+
+
+def test_unicode_endpoint(client):
+    '''test endpoint with ascii chars'''
+    resp = client.get('/unicode')
+
+    assert resp.status == '200 OK'
+    assert (resp.data if PY2 else resp.data.decode('utf-8')) == '–'
 
 
 if __name__ == '__main__':
