@@ -15,14 +15,23 @@ with open(path.join(basedir, path.join('flask_minify', 'about.py'))) as f:
 with open(path.join(basedir, 'README.md')) as f:
     long_description += f.read()
 
-with open(path.join(requirements_path, 'main.txt')) as f:
-    requirements += [line for line in f.read().split('\n') if line]
-    test_requirements += requirements
 
-with open(path.join(requirements_path, 'test.txt')) as f:
-    test_requirements += [
-        line for line in f.read().split('\n')
-        if line and not line.startswith('-r')]
+if path.isdir(requirements_path):
+    with open(path.join(requirements_path, 'main.txt')) as f:
+        requirements += [line for line in f.read().split('\n') if line]
+        test_requirements += requirements
+
+    with open(path.join(requirements_path, 'test.txt')) as f:
+        test_requirements += [
+            line for line in f.read().split('\n')
+            if line and not line.startswith('-r')]
+else:
+    requires_path = path.join(path.join(basedir,
+                                        'Flask_Minify.egg-info'),
+                              'requires.txt')
+
+    with open(requires_path) as f:
+        requirements += [line for line in f.read().split('\n') if line]
 
 
 setup(
