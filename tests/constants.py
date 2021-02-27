@@ -50,8 +50,8 @@ body    {
 '''
 
 JS_TEMPLATE_LITERALS = '''
-const a = 'something'
-const b = ` more  than    ${a}  `
+const a = 'something';
+const b = ` more  than    ${a}  `;
 '''
 
 HTML_EMBEDDED_TAGS = '\n'.join([
@@ -79,7 +79,7 @@ MINIFIED_JS_RAW = b"console.warn(['testing',' suite']);"
 MINIFIED_LESS_RAW = b'body{color:red;}'
 
 MINIFIED_JS_TEMPLATE_LITERALS =\
-    "const a='something';const b=` more  than    ${a}  `"
+    "const a='something';const b=` more  than    ${a}  `;"
 
 
 MINIFED_HTML_EMBEDDED_TAGS = bytes(''.join([
