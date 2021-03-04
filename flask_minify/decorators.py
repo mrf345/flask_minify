@@ -23,11 +23,10 @@ def minify(html=False, js=False, cssless=False, cache=True, fail_safe=True):
     -------
         String of minified HTML content.
     '''
-    def wrapper(function):
+    def decorator(function):
         @wraps(function)
-        def decorator(*args, **kwargs):
-            response_text = function(*args, **kwargs)
-            text = response_text
+        def wrapper(*args, **kwargs):
+            text = function(*args, **kwargs)
             key = None
             cache_key, cached = function.__dict__.get('minify', (None, None))
             should_minify = isinstance(text, str) and any([html, js, cssless])
@@ -41,11 +40,10 @@ def minify(html=False, js=False, cssless=False, cache=True, fail_safe=True):
                                              not html, cssless, js)
 
                     if cache:
-                        function.__dict__['minify'] = (hashing(response_text)
-                                                       .hexdigest(), text)
+                        function.__dict__['minify'] = (key, text)
 
-            return cache if all([cache_key == key,
-                                 cache,
-                                 should_minify]) else text
-        return decorator
-    return wrapper
+            return cached if all([cache_key == key,
+                                  cache,
+                                  should_minify]) else text
+        return wrapper
+    return decorator
