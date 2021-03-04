@@ -3,8 +3,9 @@ import os
 import sys
 from pytest import fixture
 from flask import send_from_directory
+from xxhash import xxh64
 
-from .setup import store_minify, app
+from .setup import store_minify, app, html_decorated
 from .constants import (HTML, LESS, FALSE_LESS, MINIFED_HTML, MINIFIED_JS,
                         MINIFED_LESS, MINIFIED_JS_RAW, MINIFIED_LESS_RAW, JS,
                         JS_RAW, LESS_RAW, JS_WITH_TYPE, MINIFIED_JS_WITH_TYPE,
@@ -158,6 +159,24 @@ def test_html_minify_decorated(client):
     resp = client.get('/html_decorated').data
 
     assert resp == MINIFED_HTML
+
+
+def test_html_minify_decorated_cache(client):
+    store_minify.passive = True
+    client.get('/html_decorated').data
+    resp = client.get('/html_decorated').data
+    hash_key = xxh64(HTML).hexdigest()
+
+    if sys.version_info[0] >= 3:
+        cache_tuple = html_decorated.__wrapped__.minify
+    else:
+        cache_tuple = [getattr(c.cell_contents, '__dict__')
+                       for c in html_decorated.__closure__
+                       if hasattr(c.cell_contents, '__dict__')
+                       ][-1]['minify']
+
+    assert resp == MINIFED_HTML
+    assert cache_tuple == (hash_key, resp.decode('utf-8'))
 
 
 def test_javascript_minify_decorated(client):
