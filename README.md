@@ -108,5 +108,5 @@ def __init__(
 ```
 
 ## Development:
-- **Run Tests:** `pytest`
+- **Run Tests:** `python -m pip install -r requirements/test.txt && pytest`
 - **Run style checks:** `flake8`
