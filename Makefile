@@ -1,6 +1,6 @@
 test: install
 	nox --session test
-lint:
+lint: install
 	nox --session lint
 run: install
 	python tests/integration.py
