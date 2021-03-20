@@ -16,16 +16,21 @@
 <h3 align='center'>A Flask extension to parse request's response and minify html, javascript, css and less.</h3>
 
 ## Install:
+
 #### - With pip
-> - `pip install Flask-Minify` <br />
+
+- `pip install Flask-Minify`
 
 #### - From the source:
-> - `git clone https://github.com/mrf345/flask_minify.git`<br />
-> - `cd flask_minify` <br />
-> - `python setup.py install`
+
+- `git clone https://github.com/mrf345/flask_minify.git`
+- `cd flask_minify`
+- `python setup.py install`
 
 ## Setup:
-> With this setup the extension will minify every HTML request, unless it's explicitly bypassed.
+
+With this setup the extension will minify every HTML request, unless it's explicitly bypassed.
+
 ```python
 from flask import Flask
 from flask_minify import minify
@@ -35,7 +40,8 @@ minify(app=app, html=True, js=True, cssless=True)
 ```
 
 #### - Using a decorator instead:
-> You can set the extension to be passive so it will minify only the decorated routes.
+
+You can set the extension to be passive so it will minify only the decorated routes.
 
 ```python
 from flask import Flask
@@ -51,6 +57,7 @@ def example():
 ```
 
 ## Options:
+
 ```python
 def __init__(
         self, app=None, html=True, js=True, cssless=True,
@@ -108,5 +115,6 @@ def __init__(
 ```
 
 ## Development:
-- **Run Tests:** `pytest`
-- **Run style checks:** `flake8`
+
+- **Run Tests:** `make test`
+- **Run style checks:** `make lint`
