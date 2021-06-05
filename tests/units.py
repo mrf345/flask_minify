@@ -73,5 +73,9 @@ class TestMinifyRequest:
         endpoint = '/testing'
         self.mock_request.endpoint = None
         self.bypass.append(endpoint)
+        matches, exists = self.minify_defaults.get_endpoint_matches(
+            self.minify_defaults.endpoint,
+            [endpoint],
+        )
 
-        assert self.minify_defaults.get_endpoint_matches([endpoint]) == []
+        assert (list(matches), exists) == ([], False)
