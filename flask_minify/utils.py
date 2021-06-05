@@ -74,8 +74,8 @@ def get_tag_contents(html, tag, script_types):
     contents = compile_re(r'(<{0}[^>]*>)(.*?)</{0}>'
                           .format(tag), DOTALL).findall(html)
 
-    return [content[1] for content in contents
-            if is_valid_tag_content(tag, content[0], content[1], script_types)]
+    return (content[1] for content in contents
+            if is_valid_tag_content(tag, content[0], content[1], script_types))
 
 
 def is_html(response):

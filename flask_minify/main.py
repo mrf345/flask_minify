@@ -1,6 +1,7 @@
 from sys import maxsize
 from six import StringIO
 from re import compile as compile_re
+from itertools import tee
 from flask import request, _app_ctx_stack
 from xxhash import xxh64, xxh32
 from htmlmin import minify as minify_html
@@ -86,45 +87,31 @@ class Minify(object):
 
         app and self.init_app(app)
 
-    @property
-    def app(self):
-        ''' If app was passed take it, if not get the one on top.
+    @staticmethod
+    def get_endpoint_matches(endpoint, patterns):
+        ''' Get the patterns that matches the current endpoint.
+
+        Parameters
+        ----------
+        endpoint: str
+            to finds the matches for.
+        patterns: list
+            regex patterns or strings to match endpoint.
 
         Returns
         -------
-        Flask App
-            The current Flask application.
+        list
+            patterns that match the current endpoint.
         '''
-        return self._app or (_app_ctx_stack.top and _app_ctx_stack.top.app)
+        matches, x = tee(compiled_pattern for compiled_pattern in
+                         (compile_re(p) for p in patterns)
+                         if compiled_pattern.search(endpoint))
+        matches_exist = bool(next(x, 0))
 
-    @property
-    def endpoint(self):
-        ''' Get the current response endpoint, with a failsafe.
+        return matches, matches_exist
 
-        Returns
-        -------
-        str
-            the current endpoint.
-        '''
-        with self.app.app_context():
-            path = getattr(request, 'endpoint', '') or ''
-
-            if path == 'static':
-                path = getattr(request, 'path', '') or ''
-
-            return path
-
-    def init_app(self, app):
-        ''' Handle initiation of multiple apps NOTE:Factory Method'''
-        app.after_request(self.main)
-        app.teardown_appcontext(self.teardown)
-
-    def teardown(self, exception):
-        ''' Nothing todo on app context teardown XXX:Factory Method'''
-        pass
-
-    @classmethod
-    def get_minified(cls, content, tag, fail_safe=False,
+    @staticmethod
+    def get_minified(content, tag, fail_safe=False,
                      only_html_content=False, html_cssless=False,
                      html_js=False, script_types=[]):
         ''' To minify css/less or javascript and failsafe that.
@@ -166,12 +153,12 @@ class Minify(object):
                         for sub_content in get_tag_contents(content,
                                                             tag,
                                                             script_types):
-                            content = content.replace(sub_content,
-                                                      cls.get_minified(
-                                                          sub_content,
-                                                          tag,
-                                                          fail_safe,
-                                                          script_types))
+                            content = content.replace(
+                                sub_content,
+                                Minify.get_minified(sub_content,
+                                                    tag,
+                                                    fail_safe,
+                                                    script_types))
 
                 return content if only_html_content else minify_html(
                     content,
@@ -186,24 +173,42 @@ class Minify(object):
 
             raise exception
 
-    def get_endpoint_matches(self, patterns):
-        ''' Get the patterns that matches the current endpoint.
-
-        Parameters
-        ----------
-        patterns: list
-            regex patterns or strings to match endpoint.
+    @property
+    def app(self):
+        ''' If app was passed take it, if not get the one on top.
 
         Returns
         -------
-        list
-            patterns that match the current endpoint.
+        Flask App
+            The current Flask application.
         '''
-        matches = [compiled_pattern for compiled_pattern in
-                   [compile_re(pattern) for pattern in patterns]
-                   if compiled_pattern.search(self.endpoint)]
+        return self._app or (_app_ctx_stack.top and _app_ctx_stack.top.app)
 
-        return matches
+    @property
+    def endpoint(self):
+        ''' Get the current response endpoint, with a failsafe.
+
+        Returns
+        -------
+        str
+            the current endpoint.
+        '''
+        with self.app.app_context():
+            path = getattr(request, 'endpoint', '') or ''
+
+            if path == 'static':
+                path = getattr(request, 'path', '') or ''
+
+            return path
+
+    def init_app(self, app):
+        ''' Handle initiation of multiple apps NOTE:Factory Method'''
+        app.after_request(self.main)
+        app.teardown_appcontext(self.teardown)
+
+    def teardown(self, exception):
+        ''' Nothing todo on app context teardown XXX:Factory Method'''
+        pass
 
     def get_minified_or_cached(self, content, tag):
         ''' Check if the content is already cached and restore or store it.
@@ -224,8 +229,9 @@ class Minify(object):
             return self.cache.get(self.endpoint, {})
 
         key = hashing(content.encode('utf-8')).hexdigest()
-        bypassed = bool(self.get_endpoint_matches(self.bypass_caching))
         limit_reached = len(_cache_dict()) >= self.caching_limit
+        _, bypassed = self.get_endpoint_matches(self.endpoint,
+                                                self.bypass_caching)
 
         def _cached():
             return _cache_dict().get(key)
@@ -268,8 +274,8 @@ class Minify(object):
         should_minify = any([html and self.html,
                              cssless and self.cssless,
                              js and self.js])
-        should_bypass = bool(self.get_endpoint_matches(self.bypass)
-                             or self.passive)
+        _, bypassed = self.get_endpoint_matches(self.endpoint, self.bypass)
+        should_bypass = bypassed or self.passive
 
         if should_minify and not should_bypass:
             response.direct_passthrough = False
