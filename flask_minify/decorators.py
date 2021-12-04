@@ -1,10 +1,15 @@
 from functools import wraps
 
-from .main import Minify as main
-from .main import hashing
 
-
-def minify(html=False, js=False, cssless=False, cache=True, fail_safe=True):
+def minify(
+    html=False,
+    js=False,
+    cssless=False,
+    cache=True,
+    fail_safe=True,
+    parsers={},
+    parser_precedence=False,
+):
     """Decorator to minify endpoint HTML output.
 
     Parameters
@@ -19,6 +24,10 @@ def minify(html=False, js=False, cssless=False, cache=True, fail_safe=True):
             enable caching minifed response.
         failsafe: bool
             silence encountered exceptions.
+        parsers: dict
+            parsers to handle minifying specific tags.
+        parser_options_take_precedence: bool
+            allow parser specific options to override the extension.
 
     Returns
     -------
@@ -28,19 +37,35 @@ def minify(html=False, js=False, cssless=False, cache=True, fail_safe=True):
     def decorator(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
+            from .main import hashing
+            from .parsers import Parser
+
             text = function(*args, **kwargs)
             key = None
             cache_key, cached = function.__dict__.get("minify", (None, None))
             should_minify = isinstance(text, str) and any([html, js, cssless])
+            runtime_options = {
+                "html": {
+                    "only_html_content": not html,
+                    "minify_inline": {
+                        "script": js,
+                        "style": cssless,
+                    },
+                },
+            }
 
             if should_minify:
                 if cache:
                     key = hashing(text).hexdigest()
 
                 if cache_key != key or not cache:
-                    text = main.get_minified(
-                        text, "html", fail_safe, not html, cssless, js
+                    parser = Parser(
+                        runtime_options=runtime_options,
+                        fail_safe=fail_safe,
+                        parsers=parsers,
+                        parser_precedence=parser_precedence,
                     )
+                    text = parser.minify(text, "html")
 
                     if cache:
                         function.__dict__["minify"] = (key, text)

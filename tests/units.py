@@ -1,17 +1,11 @@
-from importlib import import_module
 from os import path
 from sys import path as sys_path
+from unittest import mock
 
+from flask_minify import minify, parsers
 from flask_minify.utils import is_cssless, is_empty, is_html, is_js
 
-from .constants import JS_TEMPLATE_LITERALS, MINIFIED_JS_TEMPLATE_LITERALS
-
-sys_path.append(path.dirname(path.dirname(__file__)))
-minify = import_module("flask_minify").minify
-unittest = import_module("unittest")
-
-# workaround for py2 vs py3 mock import
-mock = getattr(unittest, "mock", None) or import_module("mock")
+from .constants import CSS_EDGE_CASES, MINIFIED_CSS_EDGE_CASES
 
 
 class TestUtils:
@@ -36,14 +30,6 @@ class TestUtils:
         assert is_cssless(mock.Mock(content_type="text/javascript")) is False
         assert is_cssless(mock.Mock(content_type="text/css")) is True
         assert is_cssless(mock.Mock(content_type="text/less")) is True
-
-    def test_jsmin_template_literals(self):
-        """Test `jsmin` template literals white spaces sanity"""
-
-        assert (
-            minify.get_minified(JS_TEMPLATE_LITERALS, "script")
-            == MINIFIED_JS_TEMPLATE_LITERALS
-        )
 
 
 class TestMinifyRequest:
@@ -87,3 +73,11 @@ class TestMinifyRequest:
         )
 
         assert (list(matches), exists) == ([], False)
+
+
+class TestParsers:
+    def test_css_edge_cases_with_rcssmin(self):
+        parser = parsers.Parser({"style": parsers.Rcssmin})
+        minified = parser.minify(CSS_EDGE_CASES, "style")
+
+        assert minified == MINIFIED_CSS_EDGE_CASES

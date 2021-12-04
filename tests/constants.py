@@ -54,6 +54,17 @@ const a = 'something';
 const b = ` more  than    ${a}  `;
 """
 
+CSS_EDGE_CASES = """
+.some-class {
+    color: rgba(202, 242, 255, 1);
+
+}
+
+#some-id {
+    grid-area: 1 / 2 / 2 / 3;
+}
+"""
+
 HTML_EMBEDDED_TAGS = "\n".join(
     [
         "<html>",
@@ -84,6 +95,9 @@ MINIFIED_LESS_RAW = b"body{color:red;}"
 
 MINIFIED_JS_TEMPLATE_LITERALS = "const a='something';const b=` more  than    ${a}  `;"
 
+MINIFIED_CSS_EDGE_CASES = (
+    ".some-class{color:rgba(202,242,255,1)}#some-id{grid-area:1 / 2 / 2 / 3}"
+)
 
 MINIFED_HTML_EMBEDDED_TAGS = bytes(
     "".join(

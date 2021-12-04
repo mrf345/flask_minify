@@ -1,20 +1,14 @@
-# -*- coding: utf-8 -*-
-from importlib import import_module
-from os import path
-from sys import path as sys_path
-
 from flask import Flask
+
+from flask_minify import minify
+from flask_minify import parsers as minify_parsers
+from flask_minify.decorators import minify as decorator
 
 from .constants import FALSE_LESS, HTML, HTML_EMBEDDED_TAGS, JS, JS_WITH_TYPE, LESS
 
-sys_path.append(path.dirname(path.dirname(__file__)))
-module = import_module("flask_minify")
-minify = module.minify
-decorator = module.decorators.minify
-
-
 app = Flask(__name__)
-store_minify = minify(app=app, fail_safe=False)
+parsers = {"style": minify_parsers.Lesscpy}
+store_minify = minify(app=app, fail_safe=False, parsers=parsers)
 
 
 @app.route("/html")
@@ -72,7 +66,7 @@ def js_decorated():
 
 
 @app.route("/less_decorated")
-@decorator(html=True, cssless=True)
+@decorator(html=True, cssless=True, parsers=parsers)
 def less_decorated():
     return LESS
 
