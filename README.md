@@ -21,11 +21,11 @@
 
 ## Install:
 
-#### - With pip
+With **pip**
 
 - `pip install Flask-Minify`
 
-#### - From the source:
+*Or* from the source
 
 - `git clone https://github.com/mrf345/flask_minify.git`
 - `cd flask_minify`
@@ -33,7 +33,7 @@
 
 ## Setup:
 
-With this setup the extension will minify every HTML request, unless it's explicitly bypassed.
+In this example the  extension will minify every HTML request, unless it's explicitly bypassed.
 
 ```python
 from flask import Flask
@@ -43,9 +43,7 @@ app = Flask(__name__)
 minify(app=app, html=True, js=True, cssless=True)
 ```
 
-#### - Using a decorator instead:
-
-You can set the extension to be passive so it will minify only the decorated routes.
+Another approach is using **decorators**, you can set the extension to be `passive` so will only minify the decorated routes
 
 ```python
 from flask import Flask
@@ -62,63 +60,95 @@ def example():
 
 ## Options:
 
+
+Option             | type     | Description
+-------------------|----------|-------------
+ app               | `object` | `Flask` app instance to be passed (default: `None`)
+ html              | `bool`   | minify HTML (default: `True`)
+ js                | `bool`   | minify JavaScript output (default: `True`)
+ cssless           | `bool`   | minify CSS or Less. (default: `True`)
+ fail_safe         | `bool`   | avoid raising error while minifying (default: `True`)
+ bypass            | `list`   | endpoints to bypass minifying for, supports `Regex` (default: `[]`)
+ bypass_caching    | `list`   | endpoints to bypass caching for, supports `Regex` (default: `[]`)
+ caching_limit     | `int`    | limit the number of cached response variations (default: `2`).
+ passive           | `bool`   | disable active minifying, to use *decorators* instead (default: `False`)
+ static            | `bool`   | enable minifying static files css, less and js (default: `True`)
+ script_types      | `list`   | script types to limit js minification to (default: `[]`)
+ parsers           | `dict`   | parsers to handle minifying specific tags, mainly for advanced customization (default: `{}`)
+ parser_precedence | `bool`   | allow parser specific options to take precedence over the extension (default: `False`)
+
+
+#### - `bypass` and `bypass_caching`
+
+`endpoint` in this context is the name of the function decorated with `@app.route`
+so in the following example the endpoint will be `root`:
+
 ```python
-def __init__(
-        self, app=None, html=True, js=True, cssless=True,
-        fail_safe=True, bypass=[], bypass_caching=[], caching_limit=2,
-        passive=False, static=True, script_types=[]
-    ):
-        ''' Extension to minify flask response for html, javascript, css and less.
-
-        Parameters
-        ----------
-        app: Flask.app
-            Flask app instance to be passed.
-        js: bool
-            To minify the js output.
-        cssless: bool
-            To minify spaces in css.
-        fail_safe: bool
-            to avoid raising error while minifying.
-        bypass: list
-            list of endpoints to bypass minifying for. (Regex)
-        bypass_caching: list
-            list of endpoints to bypass caching for. (Regex)
-        caching_limit: int
-            to limit the number of minified response variations.
-        passive: bool
-            to disable active minifying.
-        static: bool
-            to enable minifying static files css, less and js.
-        script_types: list
-            list of script types to limit js minification to.
-
-        Notes
-        -----
-        if `caching_limit` is set to 0, we'll not cache any endpoint responses,
-        so if you want to disable caching just do that.
-
-        `endpoint` is the name of the function decorated with the
-        `@app.route()` so in the following example the endpoint will be `root`:
-            @app.route('/root/<id>')
-            def root(id):
-                return id
-
-        when using a `Blueprint` the decorated endpoint will be suffixed with
-        the blueprint name; `Blueprint('blueprint_name')` so here the endpoint
-        will be `blueprint_name.root`.
-
-        `bypass` and `bypass_caching` can handle regex patterns so if you want
-        to bypass all routes on a certain blueprint you can just pass
-        the pattern as such:
-            minify(app, bypass=['blueprint_name.*'])
-
-        when using `script_types` include '' (empty string) in the list to
-        include script blocks which are missing the type attribute.
-        '''
+@app.route('/root/<id>')
+def root(id):
+    return id
 ```
+
+both options can handle regex patterns as input so for example, if you want to bypass all routes on a certain blueprint
+you can just pass the pattern as such:
+
+```python
+minify(app, bypass=['blueprint_name.*'])
+```
+
+#### - `caching_limit`
+
+if the option is set to `0`, we'll not cache any response, so if you want to **disable caching** just do that.
+
+
+#### - `script_types`
+
+when using the option include `''` (empty string) in the list to include script blocks which are missing the `type` attribute.
+
+#### - `parsers`
+
+using `parser` allows to pass tag specific options to the module responsible for the minification, as well as replacing the default
+parser with another included option or your own custom one. In the following example will replace the default `style` (handles CSS)
+parser `rcssmin` with `lesscpy`:
+
+```python
+from flask_minify import minify
+from flask_minify.parsers import as minify_parsers
+
+parsers = {'style': minify_parsers.Lesscpy}
+
+minify(app=app, parsers=parsers)
+```
+
+you can override the default parser runtime options as well, as shown in the following example:
+
+```python
+from flask_minify import minify
+from flask_minify.parsers import as minify_parsers
+
+class CustomCssParser(minify_parsers.Lesscpy):
+    runtime_options = {
+        **minify_parsers.Lesscpy.runtime_options,
+        "xminify": False,
+    }
+
+parsers = {'style': CustomCssParser}
+
+minify(app=app, parsers=parsers)
+```
+
+the **default** parsers are set to `{"html": Html, "script": Jsmin, "style": Lesscpy}` check [the code](https://github.com/mrf345/flask_minify/blob/master/flask_minify/parsers.py) out for more insight.
+
 
 ## Development:
 
-- **Run Tests:** `make test`
-- **Run style checks:** `make lint`
+- *Tests*: `make test`
+- *Style check*: `make lint`
+- *Format code*: `make format`
+
+## Breaking changes
+
+#### `0.33`
+
+introduces a breaking change to the expected output, in this release `lesscpy` will be replaced by `cssmin` as
+the default css minifier so no more `less` compiling by default. in case you don't want that, follow [this example](https://github.com/mrf345/flask_minify#--parsers). 
