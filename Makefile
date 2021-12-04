@@ -1,7 +1,11 @@
 test: install
-	nox --session test
+	pytest
 lint: install
-	nox --session lint
+	isort --profile black --check .
+	black --check .
+format: install
+	isort --profile black .
+	black .
 run: install
 	python tests/integration.py
 release: install clean
