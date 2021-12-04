@@ -1,8 +1,10 @@
-from re import sub, compile as compile_re, DOTALL
+from re import DOTALL
+from re import compile as compile_re
+from re import sub
 
 
 def is_empty(content):
-    ''' Check if the content is truly empty.
+    """Check if the content is truly empty.
 
     Paramaters
     ----------
@@ -12,12 +14,12 @@ def is_empty(content):
     Returns
     -------
         Boolean True if empty False if not.
-    '''
-    return not bool(len(sub(r'[ |\n|\t]', '', content or '').strip()))
+    """
+    return not len(sub(r"[ |\n|\t]", "", content or "").strip())
 
 
 def is_valid_tag_content(tag, opening_tag_html, content, script_types):
-    ''' Check if the content is valid for its tag type and definition.
+    """Check if the content is valid for its tag type and definition.
 
     Paramaters
     ----------
@@ -33,21 +35,22 @@ def is_valid_tag_content(tag, opening_tag_html, content, script_types):
     Returns
     -------
         Boolean True if valid, False if not.
-    '''
+    """
     if is_empty(content):
         return False
 
-    if tag == 'script' and len(script_types):
-        tag_no_quotes = opening_tag_html.replace('"', '')\
-                                        .replace("'", '')\
-                                        .lower()
+    if tag == "script" and len(script_types):
+        tag_no_quotes = opening_tag_html.replace('"', "").replace("'", "").lower()
 
-        if '' in script_types:
-            if 'type=' not in tag_no_quotes:
+        if "" in script_types:
+            if "type=" not in tag_no_quotes:
                 return True
 
-        valid_types = ['type={}'.format(script_type)
-                       for script_type in script_types if script_type != '']
+        valid_types = {
+            "type={}".format(script_type)
+            for script_type in script_types
+            if script_type != ""
+        }
 
         if not any(valid_type in tag_no_quotes for valid_type in valid_types):
             return False
@@ -56,7 +59,7 @@ def is_valid_tag_content(tag, opening_tag_html, content, script_types):
 
 
 def get_tag_contents(html, tag, script_types):
-    ''' Get list of html tag contents.
+    """Get list of html tag contents.
 
     Parameters
     ----------
@@ -70,16 +73,18 @@ def get_tag_contents(html, tag, script_types):
     Returns
     -------
         String of specific tag's inner content.
-    '''
-    contents = compile_re(r'(<{0}[^>]*>)(.*?)</{0}>'
-                          .format(tag), DOTALL).findall(html)
+    """
+    regex = compile_re(r"(<{0}[^>]*>)(.*?)</{0}>".format(tag), DOTALL)
 
-    return (content[1] for content in contents
-            if is_valid_tag_content(tag, content[0], content[1], script_types))
+    return (
+        content[1]
+        for content in regex.findall(html)
+        if is_valid_tag_content(tag, content[0], content[1], script_types)
+    )
 
 
 def is_html(response):
-    ''' Check if Flask response of HTML content-type.
+    """Check if Flask response of HTML content-type.
 
     Parameters
     ----------
@@ -88,14 +93,14 @@ def is_html(response):
     Returns
     -------
         True if valid False if not.
-    '''
-    content_type = getattr(response, 'content_type', '')
+    """
+    content_type = getattr(response, "content_type", "")
 
-    return 'text/html' in content_type.lower()
+    return "text/html" in content_type.lower()
 
 
 def is_js(response):
-    ''' Check if Flask response of JS content-type.
+    """Check if Flask response of JS content-type.
 
     Parameters
     ----------
@@ -104,14 +109,14 @@ def is_js(response):
     Returns
     -------
         True if valid False if not.
-    '''
-    content_type = getattr(response, 'content_type', '')
+    """
+    content_type = getattr(response, "content_type", "")
 
-    return 'javascript' in content_type.lower()
+    return "javascript" in content_type.lower()
 
 
 def is_cssless(response):
-    ''' Check if Flask response of Css or Less content-type.
+    """Check if Flask response of Css or Less content-type.
 
     Parameters
     ----------
@@ -120,14 +125,14 @@ def is_cssless(response):
     Returns
     -------
         True if valid False if not.
-    '''
-    content_type = getattr(response, 'content_type', '')
+    """
+    content_type = getattr(response, "content_type", "")
 
-    return 'css' in content_type.lower() or 'less' in content_type.lower()
+    return "css" in content_type.lower() or "less" in content_type.lower()
 
 
 def iter_tags_to_minify(cssless, js):
-    ''' Safely iterate html tags to minify, if tag's enabled.
+    """Safely iterate html tags to minify, if tag's enabled.
     Parameters
     ----------
     cssless: bool
@@ -138,7 +143,7 @@ def iter_tags_to_minify(cssless, js):
     -------
     list
         html's tag and its status.
-    '''
-    tags = {'style': cssless, 'script': js}
+    """
+    tags = {"style": cssless, "script": js}
 
-    return getattr(tags, 'iteritems', tags.items)()
+    return getattr(tags, "iteritems", tags.items)()
