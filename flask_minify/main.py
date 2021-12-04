@@ -3,25 +3,16 @@ from re import compile as compile_re
 from sys import maxsize
 
 from flask import _app_ctx_stack, request
-from htmlmin import minify as minify_html
-from jsmin import jsmin
-from lesscpy import compile as compile_less
-from six import StringIO
 from xxhash import xxh32, xxh64
 
-from flask_minify.utils import (
-    get_tag_contents,
-    is_cssless,
-    is_html,
-    is_js,
-    iter_tags_to_minify,
-)
+from flask_minify.parsers import Html, Jsmin, Lesscpy, Parser
+from flask_minify.utils import is_cssless, is_html, is_js
 
 # optimized hashing speed based on cpu architecture
 hashing = xxh64 if maxsize > 2 ** 32 else xxh32
 
 
-class Minify(object):
+class Minify:
     "Extension to minify flask response for html, javascript, css and less."
 
     def __init__(
@@ -37,6 +28,8 @@ class Minify(object):
         passive=False,
         static=True,
         script_types=[],
+        parsers={},
+        parser_precedence=False,
     ):
         """Extension to minify flask response for html, javascript, css and less.
 
@@ -44,10 +37,12 @@ class Minify(object):
         ----------
         app: Flask.app
             Flask app instance to be passed.
+        html: bool
+            to minify HTML.
         js: bool
-            To minify the js output.
+            to minify JavaScript output.
         cssless: bool
-            To minify spaces in css.
+            to minify CSS or Less.
         fail_safe: bool
             to avoid raising error while minifying.
         bypass: list
@@ -62,6 +57,10 @@ class Minify(object):
             to enable minifying static files css, less and js.
         script_types: list
             list of script types to limit js minification to.
+        parsers: dict
+            parsers to handle minifying specific tags.
+        parser_precedence: bool
+            allow parser specific options to take precedence over the extension.
 
         Notes
         -----
@@ -98,6 +97,17 @@ class Minify(object):
         self._app = app
         self.passive = passive
         self.static = static
+        runtime_options = {
+            "html": {
+                "only_html_content": not html,
+                "script_types": script_types,
+                "minify_inline": {
+                    "script": js,
+                    "style": cssless,
+                },
+            },
+        }
+        self.parser = Parser(parsers, runtime_options, fail_safe, parser_precedence)
 
         app and self.init_app(app)
 
@@ -122,77 +132,9 @@ class Minify(object):
             for compiled_pattern in (compile_re(p) for p in patterns)
             if compiled_pattern.search(endpoint)
         )
-        matches_exist = bool(next(x, 0))
+        has_matches = bool(next(x, 0))
 
-        return matches, matches_exist
-
-    @staticmethod
-    def get_minified(
-        content,
-        tag,
-        fail_safe=False,
-        only_html_content=False,
-        html_cssless=False,
-        html_js=False,
-        script_types=[],
-    ):
-        """To minify css/less or javascript and failsafe that.
-
-        Parameters
-        ----------
-        content: str
-            a script or style html tag content.
-        style: bool
-            if the content belongs to a style html tag.
-        failsafe: bool
-            to avoid raising error while minifying.
-        only_html_content: bool
-            to skip minifying the HTML tag and just minify its content.
-        html_cssless: bool
-            to minify html inner css/less.
-        html_js: bool
-            to minify html inner js.
-        script_types: list
-            list of script types to limit js minification to.
-
-        Returns
-        -------
-        str
-            minified passed content.
-        """
-        try:
-            if tag == "style":
-                return compile_less(StringIO(content), minify=True, xminify=True)
-            elif tag == "script":
-                return jsmin(content, quote_chars="'\"`")
-            elif tag == "html":
-                for tag, enabled in iter_tags_to_minify(html_cssless, html_js):
-                    if enabled:
-                        for sub_content in get_tag_contents(content, tag, script_types):
-                            content = content.replace(
-                                sub_content,
-                                Minify.get_minified(
-                                    sub_content, tag, fail_safe, script_types
-                                ),
-                            )
-
-                return (
-                    content
-                    if only_html_content
-                    else minify_html(
-                        content,
-                        remove_comments=True,
-                        remove_optional_attribute_quotes=False,
-                    )
-                )
-            else:
-                raise AttributeError("Unknown HTML tag")
-
-        except Exception as exception:
-            if fail_safe:
-                return content
-
-            raise exception
+        return matches, has_matches
 
     @property
     def app(self):
@@ -258,15 +200,7 @@ class Minify(object):
             return _cache_dict().get(key)
 
         def _minified():
-            return self.get_minified(
-                content,
-                tag,
-                self.fail_safe,
-                not self.html,
-                self.cssless,
-                self.js,
-                self.script_types,
-            )
+            return self.parser.minify(content, tag)
 
         if not _cached() and not bypassed:
             if limit_reached and _cache_dict():
