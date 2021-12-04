@@ -1,19 +1,23 @@
 <h1 align='center'> flask_minify </h1>
 <p align='center'>
-<a href='https://travis-ci.com/mrf345/flask_minify'>
-  <img src='https://travis-ci.com/mrf345/flask_minify.svg?branch=master'>
+<a href='https://pypi.org/project/Flask-Minify/'>
+    <img src='https://img.shields.io/github/v/tag/mrf345/flask_minify' alt='Latest Release' />
 </a>
-<img src='https://img.shields.io/github/v/tag/mrf345/flask_minify' alt='Latest Release' />
-<br />
-<img src='https://img.shields.io/pypi/pyversions/flask_minify' alt='Supported versions' />
-<br />
+<a href='https://github.com/mrf345/flask_minify/actions/workflows/ci.yml'>
+  <img src='https://github.com/mrf345/flask_minify/workflows/CI/badge.svg'>
+</a>
 <a href='https://coveralls.io/github/mrf345/flask_minify?branch=master'>
   <img src='https://coveralls.io/repos/github/mrf345/flask_minify/badge.svg?branch=master' alt='Coverage Status' />
 </a>
-<img src='https://img.shields.io/badge/code%20style-pep8-orange.svg' alt='Code Style' />
-<img src='https://img.shields.io/pypi/dm/flask_minify' alt='Number of downloads' />
+<a href='https://github.com/psf/black'>
+    <img src='https://img.shields.io/badge/code%20style-black-000000.svg' alt='Code Style Black' />
+</a>
+<br />
+<img src='https://img.shields.io/pypi/pyversions/flask_minify' alt='Supported versions' />
+<br />
 </p>
-<h3 align='center'>A Flask extension to parse request's response and minify html, javascript, css and less.</h3>
+
+<h3 align='center'>Flask extension to parse and minify html, javascript, css and less.</h3>
 
 ## Install:
 

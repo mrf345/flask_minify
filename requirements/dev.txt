@@ -3,4 +3,3 @@
 pytest-pudb
 pudb
 twine
-nox

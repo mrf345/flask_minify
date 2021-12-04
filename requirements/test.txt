@@ -3,6 +3,6 @@ pytest
 pytest-runner
 pytest-cov
 coverage
-python-coveralls
 mock
-flake8
+isort
+black
