@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import os
-import sys
 
 from flask import send_from_directory
 from pytest import fixture
@@ -24,8 +22,6 @@ from .constants import (
 )
 from .setup import app, html_decorated, store_minify
 
-PY2 = sys.version_info.major == 2
-
 
 @fixture
 def client():
@@ -37,7 +33,11 @@ def client():
     store_minify.bypass_caching = []
     store_minify.cache = {}
     store_minify.passive = False
-    store_minify.script_types = []
+    store_minify.parser.runtime_options["html"]["minify_inline"] = {
+        "script": True,
+        "style": True,
+    }
+    store_minify.parser.runtime_options["html"]["script_types"] = []
     app.config["TESTING"] = True
 
     files = {
@@ -101,8 +101,9 @@ def test_minify_cache(client):
 
 def test_fail_safe(client):
     """testing fail safe enabled with false input"""
-    store_minify.fail_safe = True
+    store_minify.parser.fail_safe = True
     store_minify.cssless = False
+    store_minify.parser.runtime_options["html"]["minify_inline"] = {}
     resp = client.get("/cssless_false")
 
     assert bytes(FALSE_LESS.encode("utf-8")) == resp.data
@@ -184,15 +185,7 @@ def test_html_minify_decorated_cache(client):
     client.get("/html_decorated").data
     resp = client.get("/html_decorated").data
     hash_key = xxh64(HTML).hexdigest()
-
-    if sys.version_info[0] >= 3:
-        cache_tuple = html_decorated.__wrapped__.minify
-    else:
-        cache_tuple = [
-            getattr(c.cell_contents, "__dict__")
-            for c in html_decorated.__closure__
-            if hasattr(c.cell_contents, "__dict__")
-        ][-1]["minify"]
+    cache_tuple = html_decorated.__wrapped__.minify
 
     assert resp == MINIFED_HTML
     assert cache_tuple == (hash_key, resp.decode("utf-8"))
@@ -278,14 +271,21 @@ def test_bypass_minify_static_file(client):
 
 def test_script_types(client):
     """test script types with empty type."""
-    store_minify.script_types = ["application/javascript"]
+    store_minify.parser.runtime_options["html"]["script_types"] = [
+        "application/javascript"
+    ]
     assert client.get("/js").data == bytes(JS.encode("utf-8"))
 
-    store_minify.script_types = ["application/javascript"]
+    store_minify.parser.runtime_options["html"]["script_types"] = [
+        "application/javascript"
+    ]
     assert client.get("/js_with_type").data == MINIFIED_JS_WITH_TYPE
 
     store_minify.cache = {}
-    store_minify.script_types = ["testing", "text/javascript"]
+    store_minify.parser.runtime_options["html"]["script_types"] = [
+        "testing",
+        "text/javascript",
+    ]
     assert client.get("/js_with_type").data == bytes(JS_WITH_TYPE.encode("utf-8"))
 
 
@@ -299,7 +299,7 @@ def test_unicode_endpoint(client):
     resp = client.get("/unicode")
 
     assert resp.status == "200 OK"
-    assert (resp.data if PY2 else resp.data.decode("utf-8")) == "–"
+    assert resp.data.decode("utf-8") == "–"
 
 
 if __name__ == "__main__":
