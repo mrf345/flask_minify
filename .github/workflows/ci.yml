@@ -1,0 +1,25 @@
+name: Continues Integration
+on: [push]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: pip install -r requirements/test.txt
+      - name: Style check
+        run: |
+          python -m isort --profile black --check . &&
+          python -m black --check .
+      - name: Tests
+        run: python -m pytest
