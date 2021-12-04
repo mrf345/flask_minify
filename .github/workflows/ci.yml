@@ -1,4 +1,4 @@
-name: Continues Integration
+name: Build
 on: [push]
 
 jobs:
