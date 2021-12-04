@@ -7,12 +7,12 @@
   <img src='https://github.com/mrf345/flask_minify/workflows/Build/badge.svg'>
 </a>
 <a href='https://github.com/mrf345/flask_minify/actions/workflows/ci.yml'>
-  <img src='https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/mrf345/bc746d7bfe356b54fbb93b2ea5d0d2a4/raw/flask_minify_heads_main.json' alt='Coverage Percentage' />
+  <img src='https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/mrf345/bc746d7bfe356b54fbb93b2ea5d0d2a4/raw/flask_minify__heads_master.json' alt='Coverage Percentage' />
 </a>
+<br />
 <a href='https://github.com/psf/black'>
     <img src='https://img.shields.io/badge/code%20style-black-000000.svg' alt='Code Style Black' />
 </a>
-<br />
 <img src='https://img.shields.io/pypi/pyversions/flask_minify' alt='Supported versions' />
 <br />
 </p>

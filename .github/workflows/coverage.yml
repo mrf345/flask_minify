@@ -31,5 +31,5 @@ jobs:
           filename: flask_minify__${{ env.BRANCH }}.json
           label: Test Coverage
           message: ${{ env.COVERAGE }}
-          color: black
+          color: green
           namedLogo: pytest
