@@ -136,7 +136,7 @@ parsers = {'style': CustomCssParser}
 minify(app=app, parsers=parsers)
 ```
 
-the **default** parsers are set to `{"html": Html, "script": Jsmin, "style": Lesscpy}` check [the code](https://github.com/mrf345/flask_minify/blob/master/flask_minify/parsers.py) out for more insight.
+the **default** parsers are set to `{"html": Html, "script": Jsmin, "style": Rcssmin}` check out [the code](https://github.com/mrf345/flask_minify/blob/master/flask_minify/parsers.py) for more insight.
 
 
 ## Development:
