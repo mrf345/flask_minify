@@ -1,6 +1,9 @@
 from re import DOTALL
 from re import compile as compile_re
 from re import sub
+from sys import maxsize
+
+from xxhash import xxh32, xxh64
 
 
 def is_empty(content):
@@ -129,3 +132,8 @@ def is_cssless(response):
     content_type = getattr(response, "content_type", "")
 
     return "css" in content_type.lower() or "less" in content_type.lower()
+
+
+def get_optimized_hashing():
+    """Gets optimized hashing module based on cpu architecture"""
+    return xxh64 if maxsize > 2 ** 32 else xxh32

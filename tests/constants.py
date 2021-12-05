@@ -117,3 +117,5 @@ MINIFED_HTML_EMBEDDED_TAGS = bytes(
         ]
     ).encode("utf-8")
 )
+
+COMPILED_LESS_RAW = "body {\n color: red;\n}"

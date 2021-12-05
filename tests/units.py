@@ -1,11 +1,14 @@
-from os import path
-from sys import path as sys_path
 from unittest import mock
 
 from flask_minify import minify, parsers
 from flask_minify.utils import is_cssless, is_empty, is_html, is_js
 
-from .constants import CSS_EDGE_CASES, MINIFIED_CSS_EDGE_CASES
+from .constants import (
+    COMPILED_LESS_RAW,
+    CSS_EDGE_CASES,
+    LESS_RAW,
+    MINIFIED_CSS_EDGE_CASES,
+)
 
 
 class TestUtils:
@@ -81,3 +84,14 @@ class TestParsers:
         minified = parser.minify(CSS_EDGE_CASES, "style")
 
         assert minified == MINIFIED_CSS_EDGE_CASES
+
+    def test_overriding_parser_options(self):
+        new_options = {"minify": False}
+
+        class CustomParser(parsers.Lesscpy):
+            runtime_options = new_options
+
+        parser = parsers.Parser({"style": CustomParser})
+        minified = parser.minify(LESS_RAW, "style")
+
+        assert minified == COMPILED_LESS_RAW

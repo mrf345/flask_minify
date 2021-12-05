@@ -8,29 +8,38 @@ from rcssmin import cssmin
 from flask_minify.utils import get_tag_contents
 
 
-class Jsmin:
-    runtime_options = {"quote_chars": "'\"`"}
+class ParserMixin:
+    # parser specific runtime option will take precedence over global
+    takes_precedence = False
+
+    @property
+    def options_changed(self):
+        return self._o != self.runtime_options
+
+
+class Jsmin(ParserMixin):
+    runtime_options = _o = {"quote_chars": "'\"`"}
     executer = staticmethod(jsmin)
 
 
-class Rcssmin:
-    runtime_options = {"keep_bang_comments": False}
+class Rcssmin(ParserMixin):
+    runtime_options = _o = {"keep_bang_comments": False}
     executer = staticmethod(cssmin)
 
 
-class Lesscpy:
-    runtime_options = {"minify": True, "xminify": True}
+class Lesscpy(ParserMixin):
+    runtime_options = _o = {"minify": True, "xminify": True}
 
     def executer(self, content, **options):
         return compile_less(StringIO(content), **options)
 
 
-class Html:
+class Html(ParserMixin):
     _default_tags = {
         "script": False,
         "style": False,
     }
-    runtime_options = {
+    runtime_options = _o = {
         "remove_comments": True,
         "remove_optional_attribute_quotes": False,
         "only_html_content": False,
@@ -58,14 +67,26 @@ class Parser:
     def __init__(
         self,
         parsers={},
-        runtime_options={},
         fail_safe=False,
-        parser_precedence=False,
+        runtime_options={},
     ):
         self.parsers = {**self._default_parsers, **parsers}
         self.runtime_options = {**runtime_options}
         self.fail_safe = fail_safe
-        self.parser_precedence = parser_precedence
+
+    def update_runtime_options(
+        self, html=False, js=False, cssless=False, script_types=[]
+    ):
+        self.runtime_options.setdefault("html", {}).update(
+            {
+                "only_html_content": not html,
+                "script_types": script_types,
+                "minify_inline": {
+                    "script": js,
+                    "style": cssless,
+                },
+            }
+        )
 
     def minify(self, content, tag):
         if tag not in self.parsers:
@@ -74,7 +95,9 @@ class Parser:
         parser = self.parsers[tag]()
         parser.parser = self
 
-        if self.parser_precedence:
+        if parser.options_changed:
+            runtime_options = parser.runtime_options
+        elif parser.takes_precedence:
             runtime_options = {
                 **self.runtime_options.get(tag, {}),
                 **parser.runtime_options,
