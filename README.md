@@ -75,7 +75,6 @@ Option             | type     | Description
  static            | `bool`   | enable minifying static files css, less and js (default: `True`)
  script_types      | `list`   | script types to limit js minification to (default: `[]`)
  parsers           | `dict`   | parsers to handle minifying specific tags, mainly for advanced customization (default: `{}`)
- parser_precedence | `bool`   | allow parser specific options to take precedence over the extension (default: `False`)
 
 
 #### - `bypass` and `bypass_caching`
@@ -107,9 +106,9 @@ when using the option include `''` (empty string) in the list to include script 
 
 #### - `parsers`
 
-using `parser` allows to pass tag specific options to the module responsible for the minification, as well as replacing the default
-parser with another included option or your own custom one. In the following example will replace the default `style` (handles CSS)
-parser `rcssmin` with `lesscpy`:
+allows passing tag specific options to the module responsible for the minification, as well as replacing the default parser with another included option or your own custom one.
+
+In the following example will replace the default `style` (handles CSS) parser `rcssmin` with `lesscpy`:
 
 ```python
 from flask_minify import minify

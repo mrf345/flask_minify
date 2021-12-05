@@ -1,15 +1,10 @@
 from itertools import tee
 from re import compile as compile_re
-from sys import maxsize
 
 from flask import _app_ctx_stack, request
-from xxhash import xxh32, xxh64
 
-from flask_minify.parsers import Html, Jsmin, Lesscpy, Parser
-from flask_minify.utils import is_cssless, is_html, is_js
-
-# optimized hashing speed based on cpu architecture
-hashing = xxh64 if maxsize > 2 ** 32 else xxh32
+from flask_minify.parsers import Parser
+from flask_minify.utils import get_optimized_hashing, is_cssless, is_html, is_js
 
 
 class Minify:
@@ -29,7 +24,6 @@ class Minify:
         static=True,
         script_types=[],
         parsers={},
-        parser_precedence=False,
     ):
         """Extension to minify flask response for html, javascript, css and less.
 
@@ -59,8 +53,6 @@ class Minify:
             list of script types to limit js minification to.
         parsers: dict
             parsers to handle minifying specific tags.
-        parser_precedence: bool
-            allow parser specific options to take precedence over the extension.
 
         Notes
         -----
@@ -97,17 +89,9 @@ class Minify:
         self._app = app
         self.passive = passive
         self.static = static
-        runtime_options = {
-            "html": {
-                "only_html_content": not html,
-                "script_types": script_types,
-                "minify_inline": {
-                    "script": js,
-                    "style": cssless,
-                },
-            },
-        }
-        self.parser = Parser(parsers, runtime_options, fail_safe, parser_precedence)
+        self.hashing = get_optimized_hashing()
+        self.parser = Parser(parsers, fail_safe)
+        self.parser.update_runtime_options(html, js, cssless, script_types)
 
         app and self.init_app(app)
 
@@ -192,7 +176,7 @@ class Minify:
         def _cache_dict():
             return self.cache.get(self.endpoint, {})
 
-        key = hashing(content.encode("utf-8")).hexdigest()
+        key = self.hashing(content.encode("utf-8")).hexdigest()
         limit_reached = len(_cache_dict()) >= self.caching_limit
         _, bypassed = self.get_endpoint_matches(self.endpoint, self.bypass_caching)
 
