@@ -109,11 +109,10 @@ class Parser:
             }
 
         try:
-            minified = parser.executer(content, **runtime_options)
+            minified_or_content = parser.executer(content, **runtime_options)
         except Exception as e:
-            minified = parser.executer(content, **runtime_options)
             if not self.fail_safe:
                 raise e
-            minified = content
+            minified_or_content = content
 
-        return minified
+        return minified_or_content
