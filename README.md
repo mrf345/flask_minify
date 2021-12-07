@@ -37,23 +37,23 @@ In this example the  extension will minify every HTML request, unless it's expli
 
 ```python
 from flask import Flask
-from flask_minify import minify
+from flask_minify import Minify
 
 app = Flask(__name__)
-minify(app=app, html=True, js=True, cssless=True)
+Minify(app=app, html=True, js=True, cssless=True)
 ```
 
 Another approach is using **decorators**, you can set the extension to be `passive` so will only minify the decorated routes
 
 ```python
 from flask import Flask
-from flask_minify import minify, decorators
+from flask_minify import Minify, decorators as minify_decorators
 
 app = Flask(__name__)
-minify(app=app, passive=True)
+Minify(app=app, passive=True)
 
 @app.route('/')
-@decorators.minify(html=True, js=True, cssless=True)
+@minify_decorators.minify(html=True, js=True, cssless=True)
 def example():
   return '<h1>Example...</h1>'
 ```
@@ -92,7 +92,7 @@ both options can handle regex patterns as input so for example, if you want to b
 you can just pass the pattern as such:
 
 ```python
-minify(app, bypass=['blueprint_name.*'])
+Minify(app, bypass=['blueprint_name.*'])
 ```
 
 #### - `caching_limit`
@@ -111,19 +111,17 @@ allows passing tag specific options to the module responsible for the minificati
 In the following example will replace the default `style` (handles CSS) parser `rcssmin` with `lesscpy`:
 
 ```python
-from flask_minify import minify
-from flask_minify.parsers import as minify_parsers
+from flask_minify import Minify, parsers as minify_parsers
 
 parsers = {'style': minify_parsers.Lesscpy}
 
-minify(app=app, parsers=parsers)
+Minify(app=app, parsers=parsers)
 ```
 
 you can override the default parser runtime options as well, as shown in the following example:
 
 ```python
-from flask_minify import minify
-from flask_minify.parsers import as minify_parsers
+from flask_minify import Minify, parsers as minify_parsers
 
 class CustomCssParser(minify_parsers.Lesscpy):
     runtime_options = {
@@ -133,7 +131,7 @@ class CustomCssParser(minify_parsers.Lesscpy):
 
 parsers = {'style': CustomCssParser}
 
-minify(app=app, parsers=parsers)
+Minify(app=app, parsers=parsers)
 ```
 
 the **default** parsers are set to `{"html": Html, "script": Jsmin, "style": Rcssmin}` check out [the code](https://github.com/mrf345/flask_minify/blob/master/flask_minify/parsers.py) for more insight.
