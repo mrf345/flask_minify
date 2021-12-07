@@ -102,8 +102,6 @@ def test_minify_cache(client):
 def test_fail_safe(client):
     """testing fail safe enabled with false input"""
     store_minify.parser.fail_safe = True
-    store_minify.cssless = False
-    store_minify.parser.runtime_options["html"]["minify_inline"] = {}
     resp = client.get("/cssless_false")
 
     assert bytes(FALSE_LESS.encode("utf-8")) == resp.data
