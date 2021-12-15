@@ -86,8 +86,8 @@ def get_tag_contents(html, tag, script_types):
     )
 
 
-def is_html(response):
-    """Check if Flask response of HTML content-type.
+def does_content_type_match(response):
+    """Check if Flask response of content-type match HTML, CSS\LESS or JS.
 
     Parameters
     ----------
@@ -95,43 +95,15 @@ def is_html(response):
 
     Returns
     -------
-        True if valid False if not.
+        (bool, bool, bool)
+            html, cssless, js if content type match.
     """
-    content_type = getattr(response, "content_type", "")
+    content_type = getattr(response, "content_type", "").lower()
+    html = "text/html" in content_type
+    cssless = "css" in content_type or "less" in content_type
+    js = "javascript" in content_type
 
-    return "text/html" in content_type.lower()
-
-
-def is_js(response):
-    """Check if Flask response of JS content-type.
-
-    Parameters
-    ----------
-        response: Flask response
-
-    Returns
-    -------
-        True if valid False if not.
-    """
-    content_type = getattr(response, "content_type", "")
-
-    return "javascript" in content_type.lower()
-
-
-def is_cssless(response):
-    """Check if Flask response of Css or Less content-type.
-
-    Parameters
-    ----------
-        response: Flask response
-
-    Returns
-    -------
-        True if valid False if not.
-    """
-    content_type = getattr(response, "content_type", "")
-
-    return "css" in content_type.lower() or "less" in content_type.lower()
+    return html, cssless, js
 
 
 def get_optimized_hashing():
