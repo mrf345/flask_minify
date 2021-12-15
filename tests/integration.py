@@ -2,7 +2,6 @@ import os
 
 from flask import send_from_directory
 from pytest import fixture
-from xxhash import xxh64
 
 from .constants import (
     FALSE_LESS,
@@ -25,13 +24,12 @@ from .setup import app, html_decorated, store_minify
 
 @fixture
 def client():
+    store_minify.cache.clear()
     store_minify.fail_safe = False
     store_minify.cssless = True
     store_minify.js = True
-    store_minify.caching_limit = 0
     store_minify.bypass = []
     store_minify.bypass_caching = []
-    store_minify.cache = {}
     store_minify.passive = False
     store_minify.parser.runtime_options["html"]["minify_inline"] = {
         "script": True,
@@ -89,13 +87,14 @@ def test_lesscss_minify(client):
 
 def test_minify_cache(client):
     """testing caching minifed response"""
-    store_minify.caching_limit = 10
+    store_minify.cache.limit = 10
     client.get("/cssless")  # hit it twice, to get the cached minified response
     resp = client.get("/cssless").data
 
     assert resp == MINIFED_LESS
     assert (
-        MINIFED_LESS.decode("utf-8") in store_minify.cache.get("cssless", {}).values()
+        MINIFED_LESS.decode("utf-8")
+        in store_minify.cache._cache.get("cssless", {}).values()
     )
 
 
@@ -117,23 +116,23 @@ def test_fail_safe_false_input(client):
 
 def test_caching_limit_only_when_needed(client):
     """test caching limit without any variations"""
-    store_minify.caching_limit = 5
+    store_minify.cache.limit = 5
     store_minify.cssless = True
     resp = [client.get("/cssless").data for i in range(10)]
 
-    assert len(store_minify.cache.get("cssless", {})) == 1
+    assert len(store_minify.cache._cache.get("cssless", {})) == 1
     for r in resp:
         assert MINIFED_LESS == r
 
 
 def test_caching_limit_exceeding(client):
     """test caching limit with multiple variations"""
-    store_minify.caching_limit = 4
+    new_limit = store_minify.cache.limit = 4
     resp = [client.get("/js/{}".format(i)).data for i in range(10)]
 
-    assert len(store_minify.cache.get("js_addition", {})) == store_minify.caching_limit
+    assert len(store_minify.cache._cache.get("js_addition", {})) == new_limit
 
-    for v in store_minify.cache.get("js_addition", {}).values():
+    for v in store_minify.cache._cache.get("js_addition", {}).values():
         assert bytes(v.encode("utf-8")) in resp
 
 
@@ -143,7 +142,7 @@ def test_bypass_caching(client):
     resp = client.get("/cssless")
     resp_values = [
         bytes("<style>{}</style>".format(v).encode("utf-8"))
-        for v in store_minify.cache.get("cssless", {}).values()
+        for v in store_minify.cache._cache.get("cssless", {}).values()
     ]
 
     assert MINIFED_LESS == resp.data
@@ -182,11 +181,8 @@ def test_html_minify_decorated_cache(client):
     store_minify.passive = True
     client.get("/html_decorated").data
     resp = client.get("/html_decorated").data
-    hash_key = xxh64(HTML).hexdigest()
-    cache_tuple = html_decorated.__wrapped__.minify
 
     assert resp == MINIFED_HTML
-    assert cache_tuple == (hash_key, resp.decode("utf-8"))
 
 
 def test_javascript_minify_decorated(client):
@@ -279,7 +275,7 @@ def test_script_types(client):
     ]
     assert client.get("/js_with_type").data == MINIFIED_JS_WITH_TYPE
 
-    store_minify.cache = {}
+    store_minify.cache.clear()
     store_minify.parser.runtime_options["html"]["script_types"] = [
         "testing",
         "text/javascript",

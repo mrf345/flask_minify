@@ -3,6 +3,7 @@ from unittest import mock
 
 from flask_minify import minify, parsers
 from flask_minify.cache import MemoryCache
+from flask_minify.utils import does_content_type_match, is_empty
 
 from .constants import (
     COMPILED_LESS_RAW,
@@ -20,20 +21,29 @@ class TestUtils:
 
     def test_is_html(self):
         """Test is_html check is correct"""
-        assert is_html(mock.Mock("application/json")) is False
-        assert is_html(mock.Mock(content_type="text/html")) is True
+        assert does_content_type_match(mock.Mock("application/json"))[0] is False
+        assert does_content_type_match(mock.Mock(content_type="text/html"))[0] is True
 
     def test_is_js(self):
         """Test is_js check is correct"""
-        assert is_js(mock.Mock(content_type="text/html")) is False
-        assert is_js(mock.Mock(content_type="text/javascript")) is True
-        assert is_js(mock.Mock(content_type="application/javascript")) is True
+        assert does_content_type_match(mock.Mock(content_type="text/html"))[2] is False
+        assert (
+            does_content_type_match(mock.Mock(content_type="text/javascript"))[2]
+            is True
+        )
+        assert (
+            does_content_type_match(mock.Mock(content_type="application/javascript"))[2]
+            is True
+        )
 
     def test_is_cssless(self):
         """Test is_cssless check is correct"""
-        assert is_cssless(mock.Mock(content_type="text/javascript")) is False
-        assert is_cssless(mock.Mock(content_type="text/css")) is True
-        assert is_cssless(mock.Mock(content_type="text/less")) is True
+        assert (
+            does_content_type_match(mock.Mock(content_type="text/javascript"))[1]
+            is False
+        )
+        assert does_content_type_match(mock.Mock(content_type="text/css"))[1] is True
+        assert does_content_type_match(mock.Mock(content_type="text/less"))[1] is True
 
 
 class TestMinifyRequest:
@@ -72,7 +82,6 @@ class TestMinifyRequest:
         self.mock_request.endpoint = None
         self.bypass.append(endpoint)
         matches, exists = self.minify_defaults.get_endpoint_matches(
-            self.minify_defaults.endpoint,
             [endpoint],
         )
 
