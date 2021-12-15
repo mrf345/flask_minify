@@ -1,7 +1,8 @@
+from random import randint
 from unittest import mock
 
 from flask_minify import minify, parsers
-from flask_minify.utils import is_cssless, is_empty, is_html, is_js
+from flask_minify.cache import MemoryCache
 
 from .constants import (
     COMPILED_LESS_RAW,
@@ -95,3 +96,57 @@ class TestParsers:
         minified = parser.minify(LESS_RAW, "style")
 
         assert minified == COMPILED_LESS_RAW
+
+
+class TestMemoryCache:
+    def setup(self):
+        self.store_key_getter = lambda: "testing"
+        self.limit = 2
+        self.content = "test something to cache with"
+        self.to_cache = "testingsomethintocachehopefully"
+
+    def get_cache(self):
+        return MemoryCache(
+            self.store_key_getter,
+            self.limit,
+        )
+
+    def test_caching_is_fixed_size(self):
+        cache = self.get_cache()
+        getter = lambda: self.to_cache
+        minified = {cache.get_or_set(self.content, getter) for _ in range(100)}
+
+        assert minified == {self.to_cache}
+        assert len(cache.store) == 1
+
+    def test_caching_limit_exceeded(self):
+        self.limit = 99
+        cache = self.get_cache()
+        getter = lambda: f"{self.to_cache}{randint(1, 999999)}"
+        scope = 100
+        minified = {
+            cache.get_or_set(
+                f"{self.content}{i}",
+                getter,
+            )
+            for i in range(scope)
+        }
+
+        assert len(minified) == scope
+        assert len(cache.store) == self.limit
+
+    def test_disable_caching(self):
+        self.limit = 0
+        cache = self.get_cache()
+        getter = lambda: f"{self.to_cache}{randint(1, 999999)}"
+        scope = 100
+        minified = {
+            cache.get_or_set(
+                f"{self.content}{i}",
+                getter,
+            )
+            for i in range(scope)
+        }
+
+        assert len(minified) == scope
+        assert cache.store == {}
