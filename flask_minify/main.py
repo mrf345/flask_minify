@@ -3,8 +3,9 @@ from re import compile as compile_re
 
 from flask import _app_ctx_stack, request
 
+from flask_minify.cache import MemoryCache
 from flask_minify.parsers import Parser
-from flask_minify.utils import get_optimized_hashing, is_cssless, is_html, is_js
+from flask_minify.utils import does_content_type_match
 
 
 class Minify:
@@ -84,55 +85,16 @@ class Minify:
         self.fail_safe = fail_safe
         self.bypass = bypass
         self.bypass_caching = bypass_caching
-        self.caching_limit = caching_limit
-        self.cache = {}
         self._app = app
         self.passive = passive
         self.static = static
-        self.hashing = get_optimized_hashing()
+        self.cache = MemoryCache(self.get_endpoint, caching_limit)
         self.parser = Parser(parsers, fail_safe)
         self.parser.update_runtime_options(html, js, cssless, script_types)
 
         app and self.init_app(app)
 
-    @staticmethod
-    def get_endpoint_matches(endpoint, patterns):
-        """Get the patterns that matches the current endpoint.
-
-        Parameters
-        ----------
-        endpoint: str
-            to finds the matches for.
-        patterns: list
-            regex patterns or strings to match endpoint.
-
-        Returns
-        -------
-        list
-            patterns that match the current endpoint.
-        """
-        matches, x = tee(
-            compiled_pattern
-            for compiled_pattern in (compile_re(p) for p in patterns)
-            if compiled_pattern.search(endpoint)
-        )
-        has_matches = bool(next(x, 0))
-
-        return matches, has_matches
-
-    @property
-    def app(self):
-        """If app was passed take it, if not get the one on top.
-
-        Returns
-        -------
-        Flask App
-            The current Flask application.
-        """
-        return self._app or (_app_ctx_stack.top and _app_ctx_stack.top.app)
-
-    @property
-    def endpoint(self):
+    def get_endpoint(self):
         """Get the current response endpoint, with a failsafe.
 
         Returns
@@ -147,6 +109,17 @@ class Minify:
                 path = getattr(request, "path", "") or ""
 
             return path
+
+    @property
+    def app(self):
+        """If app was passed take it, if not get the one on top.
+
+        Returns
+        -------
+        Flask App
+            The current Flask application.
+        """
+        return self._app or (_app_ctx_stack.top and _app_ctx_stack.top.app)
 
     def init_app(self, app):
         """Handle initiation of multiple apps NOTE:Factory Method"""
@@ -172,27 +145,34 @@ class Minify:
         str
             stored or restored minifed content.
         """
+        _, bypassed = self.get_endpoint_matches(self.bypass_caching)
+        get_minified = lambda: self.parser.minify(content, tag)
 
-        def _cache_dict():
-            return self.cache.get(self.endpoint, {})
+        if bypassed:
+            return get_minified()
 
-        key = self.hashing(content.encode("utf-8")).hexdigest()
-        limit_reached = len(_cache_dict()) >= self.caching_limit
-        _, bypassed = self.get_endpoint_matches(self.endpoint, self.bypass_caching)
+        return self.cache.get_or_set(content, get_minified)
 
-        def _cached():
-            return _cache_dict().get(key)
+    def get_endpoint_matches(self, patterns):
+        """Get the patterns that matches the current endpoint.
 
-        def _minified():
-            return self.parser.minify(content, tag)
+        Parameters
+        ----------
+        patterns: list
+            regex patterns or strings to match endpoint.
 
-        if not _cached() and not bypassed:
-            if limit_reached and _cache_dict():
-                _cache_dict().popitem()
+        Returns
+        -------
+        (iterable, bool)
+            patterns that match the current endpoint, and True if any matches found
+        """
+        endpoint = self.get_endpoint()
+        matches, duplicates = tee(
+            p for p in map(compile_re, patterns) if p.search(endpoint)
+        )
+        has_matches = next(duplicates, 0) != 0
 
-            self.cache.setdefault(self.endpoint, {}).update({key: _minified()})
-
-        return _cached() or _minified()
+        return matches, has_matches
 
     def main(self, response):
         """Where a dragon once lived!
@@ -207,25 +187,20 @@ class Minify:
         Flask.Response
             minified flask response if it fits the requirements.
         """
-        html = is_html(response)
-        cssless = is_cssless(response)
-        js = is_js(response)
-        _, bypassed = self.get_endpoint_matches(self.endpoint, self.bypass)
+        _, bypassed = self.get_endpoint_matches(self.bypass)
         should_bypass = bypassed or self.passive
-        should_minify = any(
-            [
-                html and self.html,
-                cssless and self.cssless,
-                js and self.js,
-            ]
+        html, cssless, js = does_content_type_match(response)
+        should_minify = (
+            (html and self.html) or (cssless and self.cssless) or (js and self.js)
         )
 
         if should_minify and not should_bypass:
-            response.direct_passthrough = False
-            text = response.get_data(as_text=True)
-            tag = "html" if html else "script" if js else "style"
+            if html or (self.static and (cssless or js)):
+                response.direct_passthrough = False
+                content = response.get_data(as_text=True)
+                tag = "html" if html else "script" if js else "style"
+                minified = self.get_minified_or_cached(content, tag)
 
-            if html or (self.static and any([cssless, js])):
-                response.set_data(self.get_minified_or_cached(text, tag))
+                response.set_data(minified)
 
         return response

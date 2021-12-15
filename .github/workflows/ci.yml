@@ -1,5 +1,9 @@
 name: Build
-on: [push]
+on:
+  push:
+  schedule:
+    # runs a new build every saturday 
+    - cron: 0 0 * * 6
 
 jobs:
   build:
