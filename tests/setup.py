@@ -78,4 +78,4 @@ def html_embedded():
 
 @app.route("/unicode")
 def unicode_endpoint():
-    return u"–"
+    return "–"

@@ -87,7 +87,7 @@ def get_tag_contents(html, tag, script_types):
 
 
 def does_content_type_match(response):
-    """Check if Flask response of content-type match HTML, CSS\LESS or JS.
+    """Check if Flask response of content-type match HTML, CSS\\LESS or JS.
 
     Parameters
     ----------
@@ -108,4 +108,4 @@ def does_content_type_match(response):
 
 def get_optimized_hashing():
     """Gets optimized hashing module based on cpu architecture"""
-    return xxh64 if maxsize > 2 ** 32 else xxh32
+    return xxh64 if maxsize > 2**32 else xxh32
