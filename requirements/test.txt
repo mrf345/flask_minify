@@ -3,6 +3,5 @@ pytest
 pytest-runner
 pytest-cov
 coverage
-mock
-isort
-black
+isort==5.10.1
+black==22.1.0
