@@ -3,5 +3,4 @@ lesscpy
 htmlmin
 jsmin
 xxhash
-pyyaml
 rcssmin
