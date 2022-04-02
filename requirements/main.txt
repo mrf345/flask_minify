@@ -4,3 +4,7 @@ htmlmin
 jsmin
 xxhash
 rcssmin
+
+# FIXME: temproary lock to resolve
+# ImportError: cannot import name '_unicodefun' from 'click'
+click==8.0.1
