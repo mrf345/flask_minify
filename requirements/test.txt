@@ -4,4 +4,4 @@ pytest-runner
 pytest-cov
 coverage
 isort==5.10.1
-black==22.1.0
+black==22.3.0
