@@ -26,4 +26,6 @@ jobs:
           python -m isort --profile black --check . &&
           python -m black --check .
       - name: Tests
-        run: python -m pytest
+        run: |
+          python -m bandit -c bandit.yml -r .
+          python -m pytest
