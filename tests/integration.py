@@ -206,6 +206,7 @@ def test_minify_static_js_with_add_url_rule(client):
     f = "/test.js"
 
     with app.app_context():
+        app._got_first_request = False
         app.add_url_rule(
             f,
             f,
@@ -230,6 +231,7 @@ def test_minify_static_less_with_add_url_rule(client):
     f = "/test.less"
 
     with app.app_context():
+        app._got_first_request = False
         app.add_url_rule(
             f,
             f,
@@ -252,6 +254,7 @@ def test_bypass_minify_static_file(client):
     f = "/test.bypass.css"
 
     with app.app_context():
+        app._got_first_request = False
         app.add_url_rule(
             f, f, lambda: send_from_directory("../.", f[1:], mimetype="application/css")
         )
