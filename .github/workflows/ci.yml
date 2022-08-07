@@ -2,8 +2,8 @@ name: Build
 on:
   push:
   schedule:
-    # runs a new build every saturday 
-    - cron: 0 0 * * 6
+    # runs a new build everyday
+    - cron: 0 0 * * *
 
 jobs:
   build:
