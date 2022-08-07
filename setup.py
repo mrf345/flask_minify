@@ -11,7 +11,7 @@ requirements_path = path.join(basedir, "requirements")
 
 
 with open(path.join(basedir, path.join("flask_minify", "about.py"))) as f:
-    exec(f.read())
+    exec(f.read())  # nosec
 
 with open(path.join(basedir, "README.md")) as f:
     long_description += f.read()
