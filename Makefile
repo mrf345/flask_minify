@@ -1,5 +1,10 @@
+SHELL := /bin/bash
+
+# repeats the tests a given number of times
+c ?= 1 
+
 test: install
-	test -f .venv/bin/activate && source .venv/bin/activate && python -m bandit -c bandit.yml -r . && python -m pytest
+	test -f .venv/bin/activate && source .venv/bin/activate && python -m bandit -c bandit.yml -r . && python -m pytest --count=$(c)
 lint: install
 	source .venv/bin/activate && python -m isort --profile black --check . && python -m black --check .
 format: install

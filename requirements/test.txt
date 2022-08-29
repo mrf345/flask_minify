@@ -1,5 +1,6 @@
 -r ./main.txt
 pytest
+pytest-repeat
 pytest-runner
 pytest-cov
 coverage

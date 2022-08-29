@@ -131,12 +131,11 @@ class TestMemoryCache:
     def test_caching_limit_exceeded(self):
         self.limit = 99
         cache = self.get_cache()
-        getter = lambda: f"{self.to_cache}{randint(1, 999999)}"
         scope = 100
         minified = {
             cache.get_or_set(
                 f"{self.content}{i}",
-                getter,
+                lambda: f"{self.to_cache}{i}",
             )
             for i in range(scope)
         }
@@ -147,12 +146,11 @@ class TestMemoryCache:
     def test_disable_caching(self):
         self.limit = 0
         cache = self.get_cache()
-        getter = lambda: f"{self.to_cache}{randint(1, 999999)}"
         scope = 100
         minified = {
             cache.get_or_set(
                 f"{self.content}{i}",
-                getter,
+                lambda: f"{self.to_cache}{i}",
             )
             for i in range(scope)
         }
