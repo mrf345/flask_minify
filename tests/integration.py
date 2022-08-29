@@ -59,6 +59,16 @@ def client():
             pass
 
 
+def add_url_rule(route, handler):
+    added_routes = add_url_rule.__dict__.setdefault("added_routes", set())
+
+    if route not in added_routes:
+        with app.app_context():
+            app._got_first_request = False
+            app.add_url_rule(route, route, handler)
+            added_routes.add(route)
+
+
 def test_html_minify(client):
     """testing HTML minify option"""
     resp = client.get("/html")
@@ -205,15 +215,10 @@ def test_minify_static_js_with_add_url_rule(client):
     """test minifying static file js"""
     f = "/test.js"
 
-    with app.app_context():
-        app._got_first_request = False
-        app.add_url_rule(
-            f,
-            f,
-            lambda: send_from_directory(
-                "../.", f[1:], mimetype="application/javascript"
-            ),
-        )
+    add_url_rule(
+        f,
+        lambda: send_from_directory("../.", f[1:], mimetype="application/javascript"),
+    )
 
     store_minify.static = True
     assert client.get(f).data == MINIFIED_JS_RAW
@@ -230,13 +235,10 @@ def test_minify_static_less_with_add_url_rule(client):
     """test minifying static file less"""
     f = "/test.less"
 
-    with app.app_context():
-        app._got_first_request = False
-        app.add_url_rule(
-            f,
-            f,
-            lambda: send_from_directory("../.", f[1:], mimetype="application/less"),
-        )
+    add_url_rule(
+        f,
+        lambda: send_from_directory("../.", f[1:], mimetype="application/less"),
+    )
 
     store_minify.static = True
     assert client.get(f).data == MINIFIED_LESS_RAW
@@ -253,11 +255,9 @@ def test_bypass_minify_static_file(client):
     """test bypassing css file minifying"""
     f = "/test.bypass.css"
 
-    with app.app_context():
-        app._got_first_request = False
-        app.add_url_rule(
-            f, f, lambda: send_from_directory("../.", f[1:], mimetype="application/css")
-        )
+    add_url_rule(
+        f, lambda: send_from_directory("../.", f[1:], mimetype="application/css")
+    )
 
     store_minify.static = True
     assert client.get(f).data == MINIFIED_LESS_RAW
