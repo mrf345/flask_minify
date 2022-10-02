@@ -1,8 +1,10 @@
-from random import randint
 from unittest import mock
+
+import pytest
 
 from flask_minify import minify, parsers
 from flask_minify.cache import MemoryCache
+from flask_minify.exceptions import MissingApp
 from flask_minify.utils import does_content_type_match, is_empty
 
 from .constants import (
@@ -86,6 +88,14 @@ class TestMinifyRequest:
         )
 
         assert (list(matches), exists) == ([], False)
+
+    def test_access_missing_app_raises_exception(self):
+        """test accessing a missing flask app raises an exception"""
+        self.mock_app = None
+        ext = self.minify_defaults
+
+        with pytest.raises(MissingApp):
+            ext.app
 
 
 class TestParsers:

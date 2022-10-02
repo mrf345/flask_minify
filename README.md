@@ -149,6 +149,10 @@ the **default** parsers are set to `{"html": Html, "script": Jsmin, "style": Rcs
 
 ## Breaking changes
 
+#### `0.40`
+
+Due to a future deprecation in Flask 2.3, the extension is no longer going to fallback to `Flask._app_ctx_stack`, it will raise an exception instead (`flask_minify.exceptions.MissingApp`)
+
 #### `0.33`
 
 introduces a breaking change to the expected output, in this release `lesscpy` will be replaced by `cssmin` as
