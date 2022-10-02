@@ -6,9 +6,9 @@ c ?= 1
 test: install
 	test -f .venv/bin/activate && source .venv/bin/activate && python -m bandit -c bandit.yml -r . && python -m pytest --count=$(c)
 lint: install
-	source .venv/bin/activate && python -m isort --profile black --check . && python -m black --check .
+	source .venv/bin/activate && python -m isort -sg "**/.venv*" --profile black --check . && python -m black --check .
 format: install
-	test -f .venv/bin/activate && source .venv/bin/activate && python -m isort --profile black . && python -m black .
+	test -f .venv/bin/activate && source .venv/bin/activate && python -m isort -sg "**/.venv*" --profile black . && python -m black .
 run: install
 	python tests/integration.py
 release: install-dev clean

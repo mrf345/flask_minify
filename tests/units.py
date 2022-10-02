@@ -97,6 +97,7 @@ class TestMinifyRequest:
         with pytest.raises(MissingApp):
             ext.app
 
+
 class TestParsers:
     def test_css_edge_cases_with_rcssmin(self):
         parser = parsers.Parser({"style": parsers.Rcssmin})

@@ -4,9 +4,9 @@ from re import compile as compile_re
 from flask import request
 
 from flask_minify.cache import MemoryCache
+from flask_minify.exceptions import MissingApp
 from flask_minify.parsers import Parser
 from flask_minify.utils import does_content_type_match
-from flask_minify.exceptions import MissingApp
 
 
 class Minify:
