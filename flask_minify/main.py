@@ -1,10 +1,9 @@
 from itertools import tee
 from re import compile as compile_re
 
-from flask import request
+from flask import current_app, request
 
 from flask_minify.cache import MemoryCache
-from flask_minify.exceptions import MissingApp
 from flask_minify.parsers import Parser
 from flask_minify.utils import does_content_type_match
 
@@ -113,27 +112,18 @@ class Minify:
 
     @property
     def app(self):
-        """If app was passed take it, otherwise raise an exception.
+        """If app was passed take it, otherwise fallback to `Flask.current_app`.
 
         Returns
         -------
         Flask App
             The current Flask application.
-
-        Raises
-        ------
-        MissingApp
         """
-        if not self._app:
-            raise MissingApp(
-                "Flask app has not been passed to the extension `Minify(app=None)`, "
-                "nor lazy initialized with `.init_app(app)`"
-            )
-
-        return self._app
+        return self._app or current_app
 
     def init_app(self, app):
         """Handle initiation of multiple apps NOTE:Factory Method"""
+        self._app = app
         app.after_request(self.main)
         app.teardown_appcontext(self.teardown)
 

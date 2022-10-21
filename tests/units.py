@@ -4,7 +4,7 @@ import pytest
 
 from flask_minify import minify, parsers
 from flask_minify.cache import MemoryCache
-from flask_minify.exceptions import MissingApp
+from flask_minify.exceptions import FlaskMinifyException
 from flask_minify.utils import does_content_type_match, is_empty
 
 from .constants import (
@@ -89,13 +89,14 @@ class TestMinifyRequest:
 
         assert (list(matches), exists) == ([], False)
 
-    def test_access_missing_app_raises_exception(self):
-        """test accessing a missing flask app raises an exception"""
+    def test_access_app_after_lazy_initialization(self):
+        """"""
         self.mock_app = None
         ext = self.minify_defaults
+        mock_app = mock.MagicMock()
+        ext.init_app(mock_app)
 
-        with pytest.raises(MissingApp):
-            ext.app
+        assert ext.app == mock_app
 
 
 class TestParsers:
@@ -115,6 +116,16 @@ class TestParsers:
         minified = parser.minify(LESS_RAW, "style")
 
         assert minified == COMPILED_LESS_RAW
+
+    def test_parser_raising_exception_with_failsafe_disabled(self):
+        class CustomParser(parsers.Lesscpy):
+            def executer(self, content, **options):
+                raise Exception("something went wrong")
+
+        parser = parsers.Parser({"style": CustomParser})
+
+        with pytest.raises(FlaskMinifyException):
+            parser.minify(LESS_RAW, "style")
 
 
 class TestMemoryCache:
