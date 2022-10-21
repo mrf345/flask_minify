@@ -6,6 +6,7 @@ from lesscpy import compile as compile_less
 from rcssmin import cssmin
 
 from flask_minify.utils import get_tag_contents
+from flask_minify.exceptions import FlaskMinifyException
 
 
 class ParserMixin:
@@ -112,7 +113,10 @@ class Parser:
             minified_or_content = parser.executer(content, **runtime_options)
         except Exception as e:
             if not self.fail_safe:
-                raise e
+                raise FlaskMinifyException(
+                    'Failed to minify "{0}" content'.format(tag)
+                ) from e
+
             minified_or_content = content
 
         return minified_or_content
