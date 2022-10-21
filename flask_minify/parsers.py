@@ -5,8 +5,8 @@ from jsmin import jsmin
 from lesscpy import compile as compile_less
 from rcssmin import cssmin
 
-from flask_minify.utils import get_tag_contents
 from flask_minify.exceptions import FlaskMinifyException
+from flask_minify.utils import get_tag_contents
 
 
 class ParserMixin:

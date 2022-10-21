@@ -1,7 +1,7 @@
 from itertools import tee
 from re import compile as compile_re
 
-from flask import request, current_app
+from flask import current_app, request
 
 from flask_minify.cache import MemoryCache
 from flask_minify.parsers import Parser
