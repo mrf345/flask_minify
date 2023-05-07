@@ -43,6 +43,7 @@ class Html(ParserMixin):
     runtime_options = _o = {
         "remove_comments": True,
         "remove_optional_attribute_quotes": False,
+        "remove_empty_space": True,
         "only_html_content": False,
         "script_types": [],
         "minify_inline": _default_tags,
