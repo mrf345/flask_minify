@@ -1,4 +1,4 @@
-__version__ = "0.42"
+__version__ = "0.43"
 __doc__ = "Flask extension to minify html, css, js and less."
 __license__ = "MIT"
 __author__ = "Mohamed Feddad"
