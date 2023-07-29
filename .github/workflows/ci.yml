@@ -1,7 +1,5 @@
 name: Build
 on:
-  pull_request:
-    branches: [ main ]
   push:
   schedule:
     # runs a new build everyday
