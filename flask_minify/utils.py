@@ -80,9 +80,14 @@ def get_tag_contents(html, tag, script_types):
     regex = compile_re(r"(<{0}[^>]*>)(.*?)</{0}>".format(tag), DOTALL)
 
     return (
-        content[1]
-        for content in regex.findall(html)
-        if is_valid_tag_content(tag, content[0], content[1], script_types)
+        content.group(2)
+        for content in regex.finditer(html)
+        if is_valid_tag_content(
+            tag,
+            opening_tag_html=content.group(1),
+            content=content.group(2),
+            script_types=script_types,
+        )
     )
 
 

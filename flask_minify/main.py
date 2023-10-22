@@ -25,6 +25,7 @@ class Minify:
         static=True,
         script_types=[],
         parsers={},
+        go=True,
     ):
         """Extension to minify flask response for html, javascript, css and less.
 
@@ -54,6 +55,8 @@ class Minify:
             list of script types to limit js minification to.
         parsers: dict
             parsers to handle minifying specific tags.
+        go: bool
+            use optimized golang minifier if available.
 
         Notes
         -----
@@ -88,8 +91,9 @@ class Minify:
         self._app = app
         self.passive = passive
         self.static = static
+        self.go = go
         self.cache = MemoryCache(self.get_endpoint, caching_limit)
-        self.parser = Parser(parsers, fail_safe)
+        self.parser = Parser(parsers, fail_safe, go=go)
         self.parser.update_runtime_options(html, js, cssless, script_types)
 
         app and self.init_app(app)

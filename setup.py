@@ -3,6 +3,7 @@ from os import path
 from setuptools import setup
 
 supported_versions = ["3.6", "3.7", "3.8", "3.9", "3.10"]
+optional_requirements = {"go": "tdewolff-minify>=2.12.9"}
 basedir = path.abspath(path.dirname(__file__))
 long_description = ""
 requirements = []
@@ -56,6 +57,7 @@ setup(
     platforms="any",
     install_requires=requirements,
     setup_requires=test_requirements,
+    extra_requires=optional_requirements,
     keywords=[
         "flask",
         "extension",

@@ -1,9 +1,15 @@
+from functools import cache
 from io import StringIO
 
 from htmlmin import minify as minify_html
 from jsmin import jsmin
 from lesscpy import compile as compile_less
 from rcssmin import cssmin
+
+try:
+    import minify as minify_go
+except ImportError:
+    minify_go = None
 
 from flask_minify.exceptions import FlaskMinifyException
 from flask_minify.utils import get_tag_contents
@@ -12,6 +18,7 @@ from flask_minify.utils import get_tag_contents
 class ParserMixin:
     # parser specific runtime option will take precedence over global
     takes_precedence = False
+    go = False
 
     @property
     def options_changed(self):
@@ -63,36 +70,91 @@ class Html(ParserMixin):
         return content if only_html_content else minify_html(content, **options)
 
 
+class GoParserMixin(ParserMixin):
+    go = True
+    media_type = "text/html"
+
+    @cache
+    def get_all_go_options(self):
+        all_options = {}
+
+        for parser in self.parser.parsers.values():
+            if parser.go:
+                all_options.update(parser.runtime_options)
+
+        return all_options
+
+    def executer(self, content, **options):
+        minify_go.config({**self.get_all_go_options(), **options})
+        return minify_go.string(self.media_type, content)
+
+
+class HtmlGo(GoParserMixin):
+    runtime_options = _o = {
+        "html-keep-comments": False,
+        "html-keep-conditional-comments": True,
+        "html-keep-default-attr-vals": True,
+        "html-keep-document-tags": True,
+        "html-keep-end-tags": True,
+        "html-keep-whitespace": False,
+        "html-keep-quotes": True,
+    }
+
+
+class JsGo(GoParserMixin):
+    media_type = "text/javascript"
+    runtime_options = _o = {
+        'js-precision': 0,
+        'js-keep-var-names': True,
+    }
+
+
+class CssGo(GoParserMixin):
+    media_type = "text/css"
+    runtime_options = _o = {'css-precision': 0}
+
+
 class Parser:
     _default_parsers = {"html": Html, "script": Jsmin, "style": Rcssmin}
+    _go_default_parsers = {"html": HtmlGo, "script": JsGo, "style": CssGo}
 
     def __init__(
         self,
         parsers={},
         fail_safe=False,
         runtime_options={},
+        go=False,
     ):
-        self.parsers = {**self._default_parsers, **parsers}
+        self.default_parsers = self._go_default_parsers if go else self._default_parsers
+        self.parsers = {**self.default_parsers, **parsers}
         self.runtime_options = {**runtime_options}
         self.fail_safe = fail_safe
+        self.go = go
+
+        if any(p.go for p in self.parsers.values()) and not minify_go:
+            raise FlaskMinifyException(
+                f"Cannot use any Go parsers without installing "
+                "Go optional dependency: `pip install flask-minify[go]`"
+            )
 
     def update_runtime_options(
         self, html=False, js=False, cssless=False, script_types=[]
     ):
-        self.runtime_options.setdefault("html", {}).update(
-            {
-                "only_html_content": not html,
-                "script_types": script_types,
-                "minify_inline": {
-                    "script": js,
-                    "style": cssless,
-                },
-            }
-        )
+        if not minify_go or not self.go:
+            self.runtime_options.setdefault("html", {}).update(
+                {
+                    "only_html_content": not html,
+                    "script_types": script_types,
+                    "minify_inline": {
+                        "script": js,
+                        "style": cssless,
+                    },
+                }
+            )
 
     def minify(self, content, tag):
         if tag not in self.parsers:
-            raise KeyError('Unknown tag "{0}"'.format(tag))
+            raise FlaskMinifyException('Unknown tag "{0}"'.format(tag))
 
         parser = self.parsers[tag]()
         parser.parser = self
