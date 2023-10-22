@@ -1,4 +1,4 @@
-from functools import cache
+from functools import lru_cache
 from io import StringIO
 
 from htmlmin import minify as minify_html
@@ -74,7 +74,7 @@ class GoParserMixin(ParserMixin):
     go = True
     media_type = "text/html"
 
-    @cache
+    @lru_cache(10)
     def get_all_go_options(self):
         all_options = {}
 
