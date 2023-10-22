@@ -88,7 +88,7 @@ HTML_EMBEDDED_TAGS = "\n".join(
     ]
 )
 
-MINIFED_HTML = b"<html><body><h1> HTML </h1></body></html>"
+MINIFIED_HTML = b"<html><body><h1> HTML </h1></body></html>"
 MINIFIED_HTML_GO = b"<html><body><h1>HTML</h1></body></html>"
 
 

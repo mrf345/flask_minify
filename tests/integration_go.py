@@ -10,13 +10,13 @@ from .constants import (
     JS_RAW,
     LESS,
     LESS_RAW,
-    MINIFIED_HTML_GO,
     MINIFIED_CSS_EDGE_CASES_GO,
     MINIFIED_HTML_EMBEDDED_TAGS_GO,
+    MINIFIED_HTML_GO,
     MINIFIED_JS,
     MINIFIED_JS_RAW_GO,
 )
-from .setup import create_app # app, html_decorated, store_minify
+from .setup import create_app  # app, html_decorated, store_minify
 
 app, store_minify = create_app(go=True)
 
@@ -90,8 +90,7 @@ def test_minify_cache(client):
 
     assert resp == MINIFIED_JS
     assert (
-        MINIFIED_JS.decode("utf-8")
-        in store_minify.cache._cache.get("js", {}).values()
+        MINIFIED_JS.decode("utf-8") in store_minify.cache._cache.get("js", {}).values()
     )
 
 

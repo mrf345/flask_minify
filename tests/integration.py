@@ -13,14 +13,13 @@ from .constants import (
     LESS_RAW,
     MINIFIED_HTML,
     MINIFIED_HTML_EMBEDDED_TAGS,
-    MINIFIED_LESS,
     MINIFIED_JS,
     MINIFIED_JS_RAW,
     MINIFIED_JS_WITH_TYPE,
+    MINIFIED_LESS,
     MINIFIED_LESS_RAW,
 )
 from .setup import create_app
-
 
 app, store_minify = create_app(go=False)
 
@@ -31,7 +30,7 @@ def client():
     store_minify.fail_safe = False
     store_minify.cssless = True
     store_minify.js = True
-    store_minify.bypass = ["html_embedded"]    
+    store_minify.bypass = ["html_embedded"]
     store_minify.bypass_caching = []
     store_minify.passive = False
     store_minify.parser.runtime_options["html"]["minify_inline"] = {

@@ -104,14 +104,14 @@ class HtmlGo(GoParserMixin):
 class JsGo(GoParserMixin):
     media_type = "text/javascript"
     runtime_options = _o = {
-        'js-precision': 0,
-        'js-keep-var-names': True,
+        "js-precision": 0,
+        "js-keep-var-names": True,
     }
 
 
 class CssGo(GoParserMixin):
     media_type = "text/css"
-    runtime_options = _o = {'css-precision': 0}
+    runtime_options = _o = {"css-precision": 0}
 
 
 class Parser:
