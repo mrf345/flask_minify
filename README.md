@@ -4,7 +4,7 @@
     <img src='https://img.shields.io/github/v/tag/mrf345/flask_minify' alt='Latest Release' />
 </a>
 <a href='https://github.com/mrf345/flask_minify/actions/workflows/ci.yml'>
-  <img src='https://github.com/mrf345/flask_minify/workflows/Build/badge.svg'>
+  <img src='https://github.com/mrf345/flask_minify/actions/workflows/ci.yml/badge.svg'>
 </a>
 <br />
 <img src='https://img.shields.io/pypi/pyversions/flask_minify' alt='Supported versions' />
