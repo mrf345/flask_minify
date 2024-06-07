@@ -29,7 +29,7 @@ With **pip**
 
 - `pip install Flask-Minify`
 
-for better performance (~2x) you can use the optional [go dependency](https://pypi.org/project/tdewolff-minify/)
+for better performance (almost two times) you can use the optional [go dependency](https://pypi.org/project/tdewolff-minify/) [only Linux support]
 
 - `pip install Flask-Minify[go]`
 
@@ -155,7 +155,7 @@ the **default** parsers are set to `{"html": Html, "script": Jsmin, "style": Rcs
 ## Breaking changes
 
 #### `0.43`
-Introduced more performant parsers that will be enabled by default, if the optional `Go` dependency is installed [tdewolff-minify](https://pypi.org/project/tdewolff-minify/). You can disable that behavior using `minify(go=False)`.
+Introduced more performant parsers that will be enabled by default, if you're running Linux and the optional `Go` dependency is installed [tdewolff-minify](https://pypi.org/project/tdewolff-minify/). You can disable that behavior using `minify(go=False)`.
 
 #### `0.40`
 

@@ -16,7 +16,7 @@ from .constants import (
     MINIFIED_JS,
     MINIFIED_JS_RAW_GO,
 )
-from .setup import create_app  # app, html_decorated, store_minify
+from .setup import create_app
 
 app, store_minify = create_app(go=True)
 
