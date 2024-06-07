@@ -1,9 +1,8 @@
 import os
 import sys
 
-from flask import send_from_directory
-from pytest import fixture
 import pytest
+from flask import send_from_directory
 
 from .constants import (
     FALSE_LESS,
@@ -27,7 +26,7 @@ app, store_minify = create_app(go=False)
 is_windows = sys.platform.startswith("win")
 
 
-@fixture
+@pytest.fixture
 def client():
     store_minify.cache.clear()
     store_minify.fail_safe = False
