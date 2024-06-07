@@ -1,7 +1,8 @@
 import os
+import sys
 
+import pytest
 from flask import send_from_directory
-from pytest import fixture
 
 from .constants import (
     FALSE_JS,
@@ -19,9 +20,11 @@ from .constants import (
 from .setup import create_app
 
 app, store_minify = create_app(go=True)
+is_windows = sys.platform.startswith("win")
+skip_reason = "Windows does not support Go parsers"
 
 
-@fixture
+@pytest.fixture
 def client():
     store_minify.cache.clear()
     store_minify.fail_safe = False
@@ -63,12 +66,14 @@ def add_url_rule(route, handler):
             added_routes.add(route)
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_go_html_minify(client):
     """testing HTML minify option"""
     resp = client.get("/html")
     assert MINIFIED_HTML_GO == resp.data
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_html_bypassing(client):
     """testing HTML route bypassing"""
     store_minify.bypass.append("html")
@@ -76,12 +81,14 @@ def test_html_bypassing(client):
     assert bytes(HTML.encode("utf-8")) == resp.data
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_javascript_minify(client):
     """testing JavaScript minify option"""
     resp = client.get("/js")
     assert MINIFIED_JS == resp.data
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_minify_cache(client):
     """testing caching minifed response"""
     store_minify.cache.limit = 10
@@ -94,6 +101,7 @@ def test_minify_cache(client):
     )
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_fail_safe(client):
     """testing fail safe enabled with false input"""
     store_minify.parser.fail_safe = True
@@ -102,6 +110,7 @@ def test_fail_safe(client):
     assert bytes(FALSE_JS.encode("utf-8")) == resp.data
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_fail_safe_false_input(client):
     """testing fail safe disabled with false input"""
     try:
@@ -110,6 +119,7 @@ def test_fail_safe_false_input(client):
         assert "CompilationError" == e.__class__.__name__
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_caching_limit_only_when_needed(client):
     """test caching limit without any variations"""
     store_minify.cache.limit = 5
@@ -121,6 +131,7 @@ def test_caching_limit_only_when_needed(client):
         assert MINIFIED_JS == r
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_caching_limit_exceeding(client):
     """test caching limit with multiple variations"""
     new_limit = store_minify.cache.limit = 4
@@ -132,6 +143,7 @@ def test_caching_limit_exceeding(client):
         assert bytes(v.encode("utf-8")) in resp
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_bypass_caching(client):
     """test endpoint bypassed not caching"""
     store_minify.bypass_caching.append("js")
@@ -145,6 +157,7 @@ def test_bypass_caching(client):
     assert resp.data not in resp_values
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_bypassing_with_regex(client):
     """test endpoint bypassed not minifying and not caching regex"""
     store_minify.bypass.append("css*")
@@ -157,6 +170,7 @@ def test_bypassing_with_regex(client):
     assert resp_false == FALSE_LESS
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_passive_flag(client):
     """test disabling active minifying"""
     store_minify.passive = True
@@ -165,6 +179,7 @@ def test_passive_flag(client):
     assert resp == HTML
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_go_html_minify_decorated(client):
     """test minifying html decorator"""
     store_minify.passive = True
@@ -173,6 +188,7 @@ def test_go_html_minify_decorated(client):
     assert resp == MINIFIED_HTML_GO
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_go_html_minify_decorated_cache(client):
     store_minify.passive = True
     client.get("/html_decorated").data
@@ -181,6 +197,7 @@ def test_go_html_minify_decorated_cache(client):
     assert resp == MINIFIED_HTML_GO
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_javascript_minify_decorated(client):
     """test minifying javascript decorator"""
     store_minify.passive = True
@@ -189,6 +206,7 @@ def test_javascript_minify_decorated(client):
     assert resp == MINIFIED_JS
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_minify_css_decorated(client):
     """test minifying css decorator"""
     store_minify.passive = True
@@ -197,6 +215,7 @@ def test_minify_css_decorated(client):
     assert resp == bytes(f"<style>{MINIFIED_CSS_EDGE_CASES_GO}</style>", "utf-8")
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_go_minify_static_js_with_add_url_rule(client):
     """test minifying static file js"""
     f = "/test.js"
@@ -217,6 +236,7 @@ def test_go_minify_static_js_with_add_url_rule(client):
     assert client.get(f).data != MINIFIED_JS_RAW_GO
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_bypass_minify_static_file(client):
     """test bypassing js file minifying"""
     f = "/test.bypass.js"
@@ -232,11 +252,13 @@ def test_bypass_minify_static_file(client):
     assert client.get(f).data != MINIFIED_JS_RAW_GO
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_html_with_embedded_tags(client):
     """test html with embedded js and less tags"""
     assert client.get("/html_embedded").data == MINIFIED_HTML_EMBEDDED_TAGS_GO
 
 
+@pytest.mark.skipif(is_windows, reason=skip_reason)
 def test_unicode_endpoint(client):
     """test endpoint with ascii chars"""
     resp = client.get("/unicode")
