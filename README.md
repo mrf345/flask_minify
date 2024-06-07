@@ -29,7 +29,11 @@ With **pip**
 
 - `pip install Flask-Minify`
 
-*Or* from the source
+for better performance (almost two times) you can use the optional [go dependency](https://pypi.org/project/tdewolff-minify/) [only Linux supported]
+
+- `pip install Flask-Minify[go]`
+
+With **setup-tools**
 
 - `git clone https://github.com/mrf345/flask_minify.git`
 - `cd flask_minify`
@@ -79,6 +83,7 @@ Option             | type     | Description
  static            | `bool`   | enable minifying static files css, less and js (default: `True`)
  script_types      | `list`   | script types to limit js minification to (default: `[]`)
  parsers           | `dict`   | parsers to handle minifying specific tags, mainly for advanced customization (default: `{}`)
+ go                | `bool`   | prefer go minifier, if optional go dependency is installed (default: `True`)
 
 
 #### - `bypass` and `bypass_caching`
@@ -148,6 +153,9 @@ the **default** parsers are set to `{"html": Html, "script": Jsmin, "style": Rcs
 - *Format code*: `make format`
 
 ## Breaking changes
+
+#### `0.44`
+Introduced more performant parsers that will be enabled by default, if you're running Linux and the optional `Go` dependency is installed [tdewolff-minify](https://pypi.org/project/tdewolff-minify/). You can disable that behavior using `minify(go=False)`.
 
 #### `0.40`
 

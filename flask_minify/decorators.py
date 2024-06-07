@@ -12,6 +12,7 @@ def minify(
     caching_limit=2,
     fail_safe=True,
     parsers={},
+    go=True,
 ):
     """Decorator to minify endpoint HTML output.
 
@@ -31,13 +32,15 @@ def minify(
             silence encountered exceptions.
         parsers: dict
             parsers to handle minifying specific tags.
+        go: bool
+            use optimized golang minifier if available.
 
     Returns
     -------
         String of minified HTML content.
     """
     caching = MemoryCache(caching_limit if cache else 0)
-    parser = Parser(parsers, fail_safe)
+    parser = Parser(parsers, fail_safe, go=go)
     parser.update_runtime_options(html, js, cssless)
 
     def decorator(function):

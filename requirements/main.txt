@@ -5,3 +5,4 @@ htmlminf
 jsmin
 xxhash
 rcssmin
+tdewolff-minify[go]; platform_system == "Linux"

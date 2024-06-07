@@ -33,6 +33,12 @@ FALSE_LESS = """<style>
         }
     </style>"""
 
+FALSE_JS = """<script>
+        let body = (
+            color: 'red';;
+        }
+    </script>"""
+
 JS_RAW = """
 console.warn(         [
     'testing',
@@ -74,7 +80,7 @@ HTML_EMBEDDED_TAGS = "\n".join(
         "<html>",
         JS,
         '<script type="text/script" src="testing/88.js"></script>',
-        LESS,
+        f"<style>{CSS_EDGE_CASES}</style>",
         '<script type="application/script" src="testing/1.js"></script>',
         JS,
         '<script src="testing/nested/2.js"></script>',
@@ -82,7 +88,9 @@ HTML_EMBEDDED_TAGS = "\n".join(
     ]
 )
 
-MINIFED_HTML = b"<html><body><h1> HTML </h1></body></html>"
+MINIFIED_HTML = b"<html><body><h1> HTML </h1></body></html>"
+MINIFIED_HTML_GO = b"<html><body><h1>HTML</h1></body></html>"
+
 
 MINIFIED_JS = b'<script>["J","S"].reduce(function(a,r){return a+r})</script>'
 
@@ -91,9 +99,11 @@ MINIFIED_JS_WITH_TYPE = (
     b"reduce(function(a,r){return a+r})</script>"
 )
 
-MINIFED_LESS = b"<style>body{color:red;}</style>"
+MINIFIED_LESS = b"<style>body{color:red;}</style>"
 
 MINIFIED_JS_RAW = b"console.warn(['testing',' suite']);"
+MINIFIED_JS_RAW_GO = b'console.warn(["testing"," suite"])'
+
 
 MINIFIED_LESS_RAW = b"body{color:red;}"
 
@@ -104,13 +114,28 @@ MINIFIED_CSS_EDGE_CASES = (
     "background-color:var(--main-bg-color)}#some-id{grid-area:1 / 2 / 2 / 3}"
 )
 
-MINIFED_HTML_EMBEDDED_TAGS = bytes(
+MINIFIED_CSS_EDGE_CASES_GO = ":root{--main-bg-color:brown}.some-class{color:#caf2ff;background-color:var(--main-bg-color)}#some-id{grid-area:1/2/2/3}"
+
+MINIFIED_HTML_EMBEDDED_TAGS = bytes(
     "".join(
         [
             "<html>",
             MINIFIED_JS.decode("utf-8"),
             '<script type="text/script" src="testing/88.js"></script>',
-            MINIFED_LESS.decode("utf-8"),
+            f"<style>{MINIFIED_CSS_EDGE_CASES}</style>",
+            '<script type="application/script" src="testing/1.js"></script>',
+            MINIFIED_JS.decode("utf-8"),
+            '<script src="testing/nested/2.js"></script></html>',
+        ]
+    ).encode("utf-8")
+)
+MINIFIED_HTML_EMBEDDED_TAGS_GO = bytes(
+    "".join(
+        [
+            "<html>",
+            MINIFIED_JS.decode("utf-8"),
+            '<script type="text/script" src="testing/88.js"></script>',
+            f"<style>{MINIFIED_CSS_EDGE_CASES_GO}</style>",
             '<script type="application/script" src="testing/1.js"></script>',
             MINIFIED_JS.decode("utf-8"),
             '<script src="testing/nested/2.js"></script></html>',
