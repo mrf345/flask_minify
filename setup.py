@@ -3,6 +3,7 @@ from os import path
 from setuptools import setup
 
 supported_versions = ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+optional_requirements = {"go": 'tdewolff-minify; platform_system == "Linux"'}
 basedir = path.abspath(path.dirname(__file__))
 long_description = ""
 requirements = []
@@ -19,7 +20,9 @@ with open(path.join(basedir, "README.md")) as f:
 
 if path.isdir(requirements_path):
     with open(path.join(requirements_path, "main.txt")) as f:
-        requirements += [line for line in f.read().split("\n") if line]
+        requirements += [
+            line for line in f.read().split("\n") if line and "[go]" not in line
+        ]
         test_requirements += requirements
 
     with open(path.join(requirements_path, "test.txt")) as f:
@@ -55,7 +58,8 @@ setup(
     include_package_data=True,
     platforms="any",
     install_requires=requirements,
-    setup_requires=test_requirements,
+    setup_requires=requirements,
+    extras_require=optional_requirements,
     keywords=[
         "flask",
         "extension",
