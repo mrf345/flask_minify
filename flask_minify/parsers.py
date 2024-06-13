@@ -92,7 +92,7 @@ class GoParserMixin(ParserMixin):
 class HtmlGo(GoParserMixin):
     runtime_options = _o = {
         "html-keep-comments": False,
-        "html-keep-conditional-comments": True,
+        "html-keep-special-comments": True,
         "html-keep-default-attr-vals": True,
         "html-keep-document-tags": True,
         "html-keep-end-tags": True,
@@ -131,11 +131,15 @@ class Parser:
         self.fail_safe = fail_safe
         self.go = go
 
-        if any(p.go for p in self.parsers.values()) and not minify_go:
+        if self.has_go_parser and not minify_go:
             raise FlaskMinifyException(
                 f"Cannot use any Go parsers without installing "
                 "Go optional dependency: `pip install flask-minify[go]`"
             )
+
+    @property
+    def has_go_parser(self):
+        return any(p.go for p in self.parsers.values())
 
     def update_runtime_options(
         self, html=False, js=False, cssless=False, script_types=[]

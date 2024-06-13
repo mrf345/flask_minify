@@ -3,7 +3,7 @@ from os import path
 from setuptools import setup
 
 supported_versions = ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
-optional_requirements = {"go": 'tdewolff-minify; platform_system == "Linux"'}
+optional_requirements = {"go": 'tdewolff-minify>=2.20.34; platform_system == "Linux"'}
 basedir = path.abspath(path.dirname(__file__))
 long_description = ""
 requirements = []
