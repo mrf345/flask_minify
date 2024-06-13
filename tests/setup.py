@@ -9,6 +9,7 @@ from .constants import (
     FALSE_JS,
     FALSE_LESS,
     HTML,
+    HTML_CONDITIONAL_COMMENTS,
     HTML_EMBEDDED_TAGS,
     JS,
     JS_WITH_TYPE,
@@ -93,5 +94,9 @@ def create_app(go=True):
     @app.route("/unicode")
     def unicode_endpoint():
         return "–"
+
+    @app.route("/conditional-comments")
+    def conditional_comments():
+        return HTML_CONDITIONAL_COMMENTS
 
     return app, store_minify

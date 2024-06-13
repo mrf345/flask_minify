@@ -12,6 +12,7 @@ from .constants import (
     LESS,
     LESS_RAW,
     MINIFIED_CSS_EDGE_CASES_GO,
+    MINIFIED_HTML_CONDITIONAL_COMMENTS,
     MINIFIED_HTML_EMBEDDED_TAGS_GO,
     MINIFIED_HTML_GO,
     MINIFIED_JS,
@@ -265,3 +266,10 @@ def test_unicode_endpoint(client):
 
     assert resp.status == "200 OK"
     assert resp.data.decode("utf-8") == "–"
+
+
+@pytest.mark.skipif(is_windows, reason=skip_reason)
+def test_go_html_minify_conditional_comments(client):
+    """testing go HTML minify with conditional comments"""
+    resp = client.get("/conditional-comments")
+    assert MINIFIED_HTML_CONDITIONAL_COMMENTS == resp.data
