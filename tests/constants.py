@@ -88,6 +88,20 @@ HTML_EMBEDDED_TAGS = "\n".join(
     ]
 )
 
+HTML_CONDITIONAL_COMMENTS = """
+<html>
+    <header>
+        <!--[if IE]>
+            IE comment!
+        <![endif]-->
+    </header>
+</html>
+"""
+
+MINIFIED_HTML_CONDITIONAL_COMMENTS = (
+    b"<html><header><!--[if IE]>IE comment!<![endif]--></header></html>"
+)
+
 MINIFIED_HTML = b"<html><body><h1> HTML </h1></body></html>"
 MINIFIED_HTML_GO = b"<html><body><h1>HTML</h1></body></html>"
 
