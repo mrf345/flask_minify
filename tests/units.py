@@ -59,6 +59,8 @@ class TestMinifyRequest:
         self.bypass = []
         self.bypass_caching = []
         self.caching_limit = 1
+        self.parsers = {}
+        self.go = True
         self.patch = mock.patch.multiple("flask_minify.main", request=self.mock_request)
 
         self.patch.start()
@@ -76,6 +78,8 @@ class TestMinifyRequest:
             self.bypass,
             self.bypass_caching,
             self.caching_limit,
+            parsers=self.parsers,
+            go=self.go,
         )
 
     def test_request_falsy_endpoint(self):
@@ -126,6 +130,26 @@ class TestParsers:
 
         with pytest.raises(FlaskMinifyException):
             parser.minify(LESS_RAW, "style")
+
+    def test_default_parsers_when_go_enabled_and_dependancy_missing(self):
+        with mock.patch("flask_minify.parsers.minify_go", None):
+            parser = parsers.Parser(go=True)
+            assert parser.default_parsers == parser._default_parsers
+
+    def test_default_parsers_when_go_enabled_and_dependency_present(self):
+        with mock.patch("flask_minify.parsers.minify_go"):
+            parser = parsers.Parser(go=True)
+            assert parser.default_parsers == parser._go_default_parsers
+
+    def test_default_parsers_when_go_disabled_and_dependency_present(self):
+        with mock.patch("flask_minify.parsers.minify_go"):
+            parser = parsers.Parser(go=False)
+            assert parser.default_parsers == parser._default_parsers
+
+    def test_go_parsers_passed_with_go_enabled_and_dependency_missing_exception(self):
+        with mock.patch("flask_minify.parsers.minify_go", None):
+            with pytest.raises(FlaskMinifyException):
+                parsers.Parser(parsers=parsers.Parser._go_default_parsers, go=True)
 
 
 class TestMemoryCache:
