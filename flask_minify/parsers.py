@@ -125,17 +125,22 @@ class Parser:
         runtime_options={},
         go=False,
     ):
-        self.default_parsers = self._go_default_parsers if go else self._default_parsers
+        self.go = go
         self.parsers = {**self.default_parsers, **parsers}
         self.runtime_options = {**runtime_options}
         self.fail_safe = fail_safe
-        self.go = go
 
         if self.has_go_parser and not minify_go:
             raise FlaskMinifyException(
                 f"Cannot use any Go parsers without installing "
                 "Go optional dependency: `pip install flask-minify[go]`"
             )
+
+    @property
+    def default_parsers(self):
+        return (
+            self._go_default_parsers if self.go and minify_go else self._default_parsers
+        )
 
     @property
     def has_go_parser(self):
