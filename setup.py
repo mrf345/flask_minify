@@ -2,7 +2,6 @@ from os import path
 
 from setuptools import setup
 
-supported_versions = ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
 optional_requirements = {"go": 'tdewolff-minify>=2.20.34; platform_system == "Linux"'}
 basedir = path.abspath(path.dirname(__file__))
 long_description = ""
@@ -38,7 +37,7 @@ else:
         requirements += [line for line in f.read().split("\n") if line]
 
 supported_python_classifiers = [
-    "Programming Language :: Python :: {0}".format(v) for v in supported_versions
+    "Programming Language :: Python :: {0}".format(v) for v in __supported_versions__
 ]
 
 setup(

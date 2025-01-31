@@ -8,7 +8,7 @@ from rcssmin import cssmin
 
 try:
     import minify as minify_go
-except ImportError:
+except Exception:
     minify_go = None
 
 from flask_minify.exceptions import FlaskMinifyException
