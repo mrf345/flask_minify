@@ -57,4 +57,6 @@ def bump(session: nox.Session):
         f.write(about_content.replace(old_version, new_version))
 
     session.run("git", "add", about_path, external=True)
-    session.run("git", "commit", "-m", f"chore: bump version to {new_version}", external=True)
+    session.run(
+        "git", "commit", "-m", f"chore: bump version to {new_version}", external=True
+    )
