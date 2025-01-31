@@ -147,10 +147,11 @@ the **default** parsers are set to `{"html": Html, "script": Jsmin, "style": Rcs
 
 
 ## Development:
+Make sure you have [nox](https://nox.thea.codes/en/stable/) installed.
 
-- *Tests*: `make test`
-- *Style check*: `make lint`
-- *Format code*: `make format`
+- *Tests*: `nox -s test`
+- *Style check*: `nox -s lint`
+- *Format code*: `nox -s format`
 
 ## Breaking changes
 
