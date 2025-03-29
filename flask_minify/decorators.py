@@ -39,7 +39,7 @@ def minify(
     -------
         String of minified HTML content.
     """
-    caching = MemoryCache(caching_limit if cache else 0)
+    caching = MemoryCache(limit=caching_limit if cache else 0)
     parser = Parser(parsers, fail_safe, go=go)
     parser.update_runtime_options(html, js, cssless)
 
