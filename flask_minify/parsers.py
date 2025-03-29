@@ -1,7 +1,7 @@
+from abc import ABCMeta, abstractmethod
 from functools import lru_cache
 from io import StringIO
-from abc import ABCMeta, abstractmethod
-from typing import Dict, Any
+from typing import Any, Dict
 
 from htmlmin import minify as minify_html
 from jsmin import jsmin
