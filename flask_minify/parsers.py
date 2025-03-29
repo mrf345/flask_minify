@@ -1,5 +1,7 @@
 from functools import lru_cache
 from io import StringIO
+from abc import ABCMeta, abstractmethod
+from typing import Dict, Any
 
 from htmlmin import minify as minify_html
 from jsmin import jsmin
@@ -15,7 +17,18 @@ from flask_minify.exceptions import FlaskMinifyException
 from flask_minify.utils import get_tag_contents
 
 
-class ParserMixin:
+class ParserBase(metaclass=ABCMeta):
+    @property
+    @abstractmethod
+    def runtime_options(self) -> Dict[str, Any]:
+        pass
+
+    @abstractmethod
+    def executer(self, *args, **kwargs):
+        pass
+
+
+class ParserMixin(ParserBase):
     # parser specific runtime option will take precedence over global
     takes_precedence = False
     go = False

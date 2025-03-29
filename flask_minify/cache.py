@@ -1,12 +1,35 @@
+from abc import ABCMeta, abstractmethod
+
 from flask_minify.utils import get_optimized_hashing
 
 
-class MemoryCache:
-    def __init__(self, store_key_getter=None, limit=0):
+class CacheBase(metaclass=ABCMeta):
+    def __init__(self, store_key_getter=None):
         self.store_key_getter = store_key_getter
+
+    @abstractmethod
+    def __getitem__(self, key):
+        pass
+
+    @abstractmethod
+    def __setitem__(self, key, value):
+        pass
+
+    @abstractmethod
+    def get_or_set(self, key, getter):
+        pass
+
+    @abstractmethod
+    def clear(self):
+        pass
+
+
+class MemoryCache(CacheBase):
+    def __init__(self, store_key_getter=None, limit=0):
+        super().__init__(store_key_getter)
         self.limit = limit
-        self._cache = {}
         self.hashing = get_optimized_hashing()
+        self._cache = {}
 
     @property
     def store(self):
