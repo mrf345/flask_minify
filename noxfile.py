@@ -16,7 +16,7 @@ with open(about_path) as f:
 
 
 @nox.session(python=__supported_versions__)  # type: ignore
-def test(session: nox.session):
+def test(session: nox.Session):
     session.install("-r", test_req_path)
     session.run("python", "-m", "pytest")
     session.run("python", "-m", "bandit", "-c", "bandit.yml", "-r", ".")
