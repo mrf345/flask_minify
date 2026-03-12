@@ -8,5 +8,5 @@ bandit
 setuptools-golang
 tdewolff-minify
 isort==5.10.1
-black==22.3.0
+black==26.3.1
 importlib_metadata==4.8.3
